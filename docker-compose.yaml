@@ -5,30 +5,43 @@ services:
       context: .
       dockerfile: ./fe/Dockerfile
     ports:
-       - "5432:5432" #PostgresSql with PostGis
-       - "3000:3000" #Node.js API
+       - "4000:4000"
     networks:
       - app_network
-  backend:
-    container_name: backend-api
+  backend-server:
+    container_name: backend-server
     build:
       context: .
-      dockerfile: ./be/Dockerfile
+      dockerfile: ./be/api/Dockerfile
     ports:
-     - "5001:5001"
+     - "3000:3000"
+    restart: "unless-stopped"
+    depends_on:
+    - backend-postgis
+    networks:
+      - app_network
+  backend-postgis:
+    container_name: postgis
+    build:
+      context: .
+      dockerfile: ./be/postgis-api/Dockerfile
+    ports:
+     - "5432:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
-      - ./countries.geojson:/docker-entrypoint-initdb.d/countries.geojson:ro
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-      - ./app:/app
+      - pgdata:/var/lib/postgresql/data
     restart: "unless-stopped"
     env_file:
       - .env
     networks:
       - app_network
+volumes:
+  pgdata:
+
 networks:
   app_network:
     driver: bridge

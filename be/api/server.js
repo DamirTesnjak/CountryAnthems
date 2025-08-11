@@ -1,0 +1,52 @@
+import express from "express";
+import pkg from "pg";
+const { Pool } = pkg;
+
+const app = express();
+const pool = new Pool({
+  user: process.env.POSTGRES_USER || "postgres",
+  host: "localhost",
+  database: process.env.POSTGRES_DB || "geo",
+  password: process.env.POSTGRES_PASSWORD || "postgres",
+  port: 5432,
+  ssl: false, // match your Postgres SSL setup
+});
+
+app.use(setCorsHeaders);
+
+function setCorsHeaders(req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+  res.setHeader("Access-Control-Allow-Methods", "GET");
+  next();
+}
+app.get("/which-country", async (req, res) => {
+  console.log("req", req.query);
+  let { lat, lng } = req.query;
+
+  lat = parseFloat(lat);
+  lng = parseFloat(lng);
+
+  if (!lat || !lng) {
+    return res.status(400).json({ error: "lat and lng required" });
+  }
+
+  const sql = `
+    SELECT name_en
+    FROM countries
+    WHERE ST_Contains(geom, ST_SetSRID(ST_Point($1, $2), 4326))
+    LIMIT 1
+  `;
+
+  try {
+    const { rows } = await pool.query(sql, [lng, lat]);
+    res.json(rows[0] || {});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { WebSocketService } from '../../webSocket.service'
 import { Subscription } from 'rxjs';
+import { CountryService } from './getCountries.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-map-box',
@@ -10,16 +11,15 @@ import { Subscription } from 'rxjs';
 })
 export class MapBox {
 
-  private websocketService = inject(WebSocketService);
   private map!: any;
   private wsSub!: Subscription;
   private geoJson!: any;
+  private countryService = inject(CountryService);
 
   async ngAfterViewInit() {
     if (typeof window !== 'undefined') {
       const L = await import('leaflet');
       this.initMap(L);
-      this.connectToWebSocket(L);
     }
   }
 
@@ -34,21 +34,10 @@ export class MapBox {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(this.map);
 
-    this.geoJson = L.geoJSON(countries, {
-      onEachFeature: function (feature: any, layer: any) {
-        // Make layer interactive
-        layer.on('click', function (e) {
-          const countryName = feature.properties.name;
-          console.log('Country clicked:', countryName);
-          // Optionally do more, like styling or popup
-        });
-        layer.on('mouseover', this.highlightCountry);
-        layer.on('mouseout', this.resetHighlight);
-      }
-    }).addTo(this.map)
+    this.map.on('click', (e: any) => this.onMapClick(e))
   }
 
-  highlightCountry(e) {
+  highlightCountry(e: any) {
     var layer = e.target;
 
     layer.setStyle({
@@ -61,15 +50,24 @@ export class MapBox {
     layer.bringToFront();
   }
 
-  resetHighlight(e) {
-    this.geoJson.resetStyle(e.target);
+  onMapClick(e: any) {
+    const { lat, lng } = e.latlng;
+    const bodyReq = {
+      lat,
+      lng
+    }
+    this.countryService.getCountry(bodyReq).subscribe({
+      next: (data) => {
+        console.log('Response:', data);
+      },
+      error: (err) => {
+        console.error('Error:', err);
+      },
+    });
   }
 
-  connectToWebSocket(L: any) {
-    this.wsSub = this.websocketService.connect().subscribe(msg => {
-      console.log('data', msg);
-    });;
-    // this.addStrike(L, lat, lng);
+  resetHighlight(e: any) {
+    this.geoJson.resetStyle(e.target);
   }
 
   addStrike(L: any, lat: number, lng: number) {
@@ -78,6 +76,5 @@ export class MapBox {
 
   ngOnDestroy(): void {
     this.wsSub?.unsubscribe();
-    this.websocketService.close();
   }
 }
