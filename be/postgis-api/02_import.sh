@@ -20,6 +20,8 @@ ogr2ogr \
   -sql "SELECT
            id,
            \"name:en\" AS name_en,
+          \"ISO3166-1\" AS country_iso,
+          \"wikidata\" AS wikidata_country,
            geometry
          FROM countries
          WHERE \"name:en\" IS NOT NULL" \
