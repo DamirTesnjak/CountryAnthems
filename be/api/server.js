@@ -31,7 +31,7 @@ app.get("/which-country", async (req, res) => {
   }
 
   const sql = `
-    SELECT name_en
+    SELECT name_en, ST_AsGeoJSON(geom) AS geom
     FROM countries
     WHERE ST_Contains(geom, ST_SetSRID(ST_Point($1, $2), 4326))
     LIMIT 1
@@ -39,7 +39,10 @@ app.get("/which-country", async (req, res) => {
 
   try {
     const { rows } = await pool.query(sql, [lng, lat]);
-    res.json(rows[0] || {});
+    res.json({
+      name: rows[0].name_en,
+      geometry: JSON.parse(rows[0].geom),
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database error" });

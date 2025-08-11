@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CountryService } from './getCountries.service';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-map-box',
@@ -29,12 +28,12 @@ export class MapBox {
       zoom: 13
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}{r}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(this.map);
 
-    this.map.on('click', (e: any) => this.onMapClick(e))
+    this.map.on('click', (e: any) => this.onMapClick(L, e))
   }
 
   highlightCountry(e: any) {
@@ -50,7 +49,7 @@ export class MapBox {
     layer.bringToFront();
   }
 
-  onMapClick(e: any) {
+  onMapClick(L: any, e: any) {
     const { lat, lng } = e.latlng;
     const bodyReq = {
       lat,
@@ -59,6 +58,8 @@ export class MapBox {
     this.countryService.getCountry(bodyReq).subscribe({
       next: (data) => {
         console.log('Response:', data);
+        const layer = L.geoJSON(data.geometry, { style: { color: 'red' } });
+        layer.addTo(this.map);
       },
       error: (err) => {
         console.error('Error:', err);
