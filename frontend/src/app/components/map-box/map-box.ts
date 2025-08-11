@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CountryService } from './getCountries.service';
 
@@ -15,6 +15,13 @@ export class MapBox {
   private geoJson!: any;
   private countryService = inject(CountryService);
 
+  mapCountryDialog!: any;
+  selectedCountry = signal({
+    flag: "",
+    countryName: "",
+    countryCapital: "Test"
+  })
+
   async ngAfterViewInit() {
     if (typeof window !== 'undefined') {
       const L = await import('leaflet');
@@ -28,9 +35,9 @@ export class MapBox {
       zoom: 13
     });
 
-    L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
       maxZoom: 18,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; ©CartoDB'
     }).addTo(this.map);
 
     this.map.on('click', (e: any) => this.onMapClick(L, e))
@@ -60,6 +67,12 @@ export class MapBox {
         console.log('Response:', data);
         const layer = L.geoJSON(data.geometry, { style: { color: 'red' } });
         layer.addTo(this.map);
+
+        this.selectedCountry.set({
+          flag: data.flag,
+          countryName: data.name,
+          countryCapital: data.capitalCity
+        })
       },
       error: (err) => {
         console.error('Error:', err);

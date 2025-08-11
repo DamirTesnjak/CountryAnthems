@@ -1,1 +1,14 @@
-<div id="map"></div>
+<div id="map">
+</div>
+<div class="country-dialog">
+    <img [src]="selectedCountry().flag" width="350px">
+    <div class="country-title">
+        {{ selectedCountry().countryName }}
+    </div>
+    <div class="country-capital">
+        <div>
+            Capital
+        </div>
+        <div class="country-capital">{{ selectedCountry().countryCapital }}</div>
+    </div>
+</div>
