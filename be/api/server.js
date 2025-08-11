@@ -9,7 +9,7 @@ const pool = new Pool({
   database: process.env.POSTGRES_DB || "geo",
   password: process.env.POSTGRES_PASSWORD || "postgres",
   port: 5432,
-  ssl: false, // match your Postgres SSL setup
+  ssl: false,
 });
 
 app.use(setCorsHeaders);
@@ -31,7 +31,7 @@ app.get("/which-country", async (req, res) => {
   }
 
   const sql = `
-    SELECT name_en, ST_AsGeoJSON(geom) AS geom
+    SELECT name_en, ST_AsGeoJSON(geom) AS geom, country_iso, capital_city
     FROM countries
     WHERE ST_Contains(geom, ST_SetSRID(ST_Point($1, $2), 4326))
     LIMIT 1
@@ -42,6 +42,8 @@ app.get("/which-country", async (req, res) => {
     res.json({
       name: rows[0].name_en,
       geometry: JSON.parse(rows[0].geom),
+      flag: `https://flagcdn.com/w640/${rows[0].country_iso.toLowerCase()}.png`,
+      capitalCity: rows[0].capital_city || rows[0].name_en,
     });
   } catch (err) {
     console.error(err);
