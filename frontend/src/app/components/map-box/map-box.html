@@ -6,9 +6,19 @@
         {{ selectedCountry().countryName }}
     </div>
     <div class="country-capital">
-        <div>
-            Capital
-        </div>
-        <div class="country-capital">{{ selectedCountry().countryCapital }}</div>
+        Capital
     </div>
+    <div class="country-capital-label">{{ selectedCountry().countryCapital }}</div>
+    <div class="national-anthem-text">
+        Anthem
+    </div>
+    <div class="national-anthem-label">
+        {{ selectedCountry().anthemLabel }}
+    </div>
+    <div class="audio-controler">
+        <audio #audioPlayer [attr.key]="selectedCountry().anthemKey" controls>
+        <source [src]="selectedCountry().anthemAudio" type="audio/ogg">
+        Your browser does not support the audio element.
+    </audio> 
+    </div> 
 </div>

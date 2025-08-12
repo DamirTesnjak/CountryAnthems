@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CountryService } from './getCountries.service';
 
@@ -8,18 +8,25 @@ import { CountryService } from './getCountries.service';
   templateUrl: './map-box.html',
   styleUrl: './map-box.scss'
 })
+
 export class MapBox {
+
+  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
 
   private map!: any;
   private wsSub!: Subscription;
   private geoJson!: any;
   private countryService = inject(CountryService);
+  private currentHighlightLayer: any = null;
 
   mapCountryDialog!: any;
   selectedCountry = signal({
+    anthemKey: 0,
     flag: "",
-    countryName: "",
-    countryCapital: "Test"
+    countryName: "Select a country",
+    countryCapital: "",
+    anthemLabel: "",
+    anthemAudio: ""
   })
 
   async ngAfterViewInit() {
@@ -32,7 +39,7 @@ export class MapBox {
   private initMap(L: any): void {
     this.map = L.map('map', {
       center: [46.0651538, 14.4644706], // Set your starting position
-      zoom: 13
+      zoom: 5
     });
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
@@ -65,14 +72,31 @@ export class MapBox {
     this.countryService.getCountry(bodyReq).subscribe({
       next: (data) => {
         console.log('Response:', data);
-        const layer = L.geoJSON(data.geometry, { style: { color: 'red' } });
-        layer.addTo(this.map);
+
+        if (this.currentHighlightLayer) {
+          this.map.removeLayer(this.currentHighlightLayer);
+          this.currentHighlightLayer = null;
+        }
+
+        this.currentHighlightLayer = L.geoJSON(data.geometry, { style: { color: 'green' } });
+        this.currentHighlightLayer.addTo(this.map);
 
         this.selectedCountry.set({
+          anthemKey: Date.now(),
           flag: data.flag,
           countryName: data.name,
-          countryCapital: data.capitalCity
+          countryCapital: data.capitalCity,
+          anthemLabel: data.anthemLabel,
+          anthemAudio: data.anthemAudio
         })
+
+        setTimeout(() => {
+          const player = this.audioPlayer.nativeElement;
+          player.load();
+          player
+            .play()
+            .catch((err) => console.warn('Autoplay blocked:', err));
+        }, 500);
       },
       error: (err) => {
         console.error('Error:', err);
