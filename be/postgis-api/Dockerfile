@@ -9,7 +9,7 @@ WORKDIR /app
 COPY be/postgis-api/countries.geojson /docker-entrypoint-initdb.d/countries.geojson
 COPY be/postgis-api/01_init.sql /docker-entrypoint-initdb.d/01_init.sql
 COPY be/postgis-api/02_import.sh /docker-entrypoint-initdb.d/02_import.sh
-COPY be/postgis-api/capitalCities.json /docker-entrypoint-initdb.d/capitalCities.json
+COPY be/postgis-api/countries_capitals_anthems.json /docker-entrypoint-initdb.d/countries_capitals_anthems.json
 COPY be/postgis-api/03_update.sql /docker-entrypoint-initdb.d/03_update.sql
 RUN chmod +x /docker-entrypoint-initdb.d/02_import.sh
 
