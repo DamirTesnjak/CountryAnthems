@@ -1,5 +1,6 @@
 import express from "express";
 import pkg from "pg";
+import cors from "cors";
 
 const { Pool } = pkg;
 
@@ -13,18 +14,13 @@ const pool = new Pool({
   ssl: false,
 });
 
-app.use(setCorsHeaders);
-
-function setCorsHeaders(req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-}
+app.use(
+  cors({
+    origin: "http://localhost:4200", // your frontend
+    methods: ["GET", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Accept"],
+  })
+);
 
 app.get("/which-country", async (req, res) => {
   console.log("req", req.query);
@@ -46,6 +42,9 @@ app.get("/which-country", async (req, res) => {
 
   try {
     const { rows } = await pool.query(sql, [lng, lat]);
+    if (!rows.length) {
+      return res.status(404).json({ error: "No country found" });
+    }
     res.json({
       name: rows[0].name_en || "",
       geometry: JSON.parse(rows[0].geom),
@@ -70,6 +69,9 @@ app.get("/random-country", async (req, res) => {
 
   try {
     const { rows } = await pool.query(sql);
+    if (!rows.length) {
+      return res.status(404).json({ error: "No country found" });
+    }
     res.json({
       name: rows[0].name_en || "",
       geometry: JSON.parse(rows[0].geom),
@@ -85,6 +87,6 @@ app.get("/random-country", async (req, res) => {
 });
 
 const port = 3000;
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
