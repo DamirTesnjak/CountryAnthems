@@ -6,21 +6,52 @@
     text-align: center;
   }
 
-#map {
-    width: 100vw; 
-    height: 100vh;
-}
-
-.country-dialog {
+@mixin dialog {
   position: absolute;
   top: 10px;
   right: 10px;
-  max-width: 370px !important;
+  max-width: 350px !important;
   background: #cccccc;
   padding: 10px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   z-index: 1000;
+}
+
+@mixin button {
+  height: 25px;
+  margin-left: 10px;
+  background-color: #808080;
+  font-size: 1.0rem;
+  color: #fff;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+#map {
+  width: 100vw; 
+  height: 100vh;
+}
+
+.controler {
+   @include dialog;
+    width: 350px !important;
+
+   button {
+    @include button();
+    background-color: #808080;
+   }
+
+   span {
+      margin-left: 10px;
+      font-weight: 700;
+   }
+}
+
+.country-dialog {
+  @include dialog;
+  top: 70px;
 
   .country-title {
     margin-top: 0.5rem;
@@ -64,6 +95,17 @@
     a {
       text-decoration: none;
       color: blue;
+    }
+  }
+
+  .next-country-button {
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 5px;
+
+    button {
+      @include button();
+      background-color: #669999;
     }
   }
 }

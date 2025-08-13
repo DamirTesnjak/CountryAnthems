@@ -14,56 +14,86 @@ export class MapBox {
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
 
   private map!: any;
+  private L!: any;
+  private tileLayer!: any;
   private wsSub!: Subscription;
-  private geoJson!: any;
   private countryService = inject(CountryService);
-  private currentHighlightLayer: any = null;
+  private countryLayer: any = null;
+  private guessedCountryLayer: any = null;
 
   mapCountryDialog!: any;
+
+  gameMode = signal({
+    gameMode: false,
+  })
+
+  showNextCountryButtonGame = signal({
+    showButton: false
+  })
+
   selectedCountry = signal({
     anthemKey: 0,
     flag: "",
-    countryName: "Select a country",
+    countryName: "",
     countryCapital: "",
     anthemLabel: "",
     anthemAudio: ""
   })
 
+  countryToGuess = signal({
+    anthemKey: 0,
+    flag: "",
+    countryName: "",
+    countryCapital: "",
+    anthemLabel: "",
+    anthemAudio: "",
+    geometry: null,
+  })
+
   async ngAfterViewInit() {
     if (typeof window !== 'undefined') {
       const L = await import('leaflet');
-      this.initMap(L);
+      this.L = L;
+      this.initMap();
     }
   }
 
-  private initMap(L: any): void {
-    this.map = L.map('map', {
+  private initMap(): void {
+    this.map = this.L.map('map', {
       center: [46.0651538, 14.4644706], // Set your starting position
       zoom: 5
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
+    this.tileLayer = this.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB'
     }).addTo(this.map);
 
-    this.map.on('click', (e: any) => this.onMapClick(L, e))
+    this.map.on('click', (e: any) => this.onMapClick(e))
   }
 
-  highlightCountry(e: any) {
-    var layer = e.target;
+  playAnthem() {
+    setTimeout(() => {
+      const player = this.audioPlayer.nativeElement;
+      player.load();
+      player
+        .play()
+        .catch((err) => console.warn('Autoplay blocked:', err));
+    }, 500);
+  }
 
-    layer.setStyle({
-      weight: 5,
-      color: '#666',
-      dashArray: '',
-      fillOpacity: 0.7
+  setSelectedCountry(data: any) {
+    this.selectedCountry.set({
+      anthemKey: Date.now(),
+      flag: data.flag,
+      countryName: data.name,
+      countryCapital: data.capitalCity,
+      anthemLabel: data.anthemLabel,
+      anthemAudio: data.anthemAudio
     });
-
-    layer.bringToFront();
   }
 
-  onMapClick(L: any, e: any) {
+  onMapClick(e: any) {
     const { lat, lng } = e.latlng;
     const bodyReq = {
       lat,
@@ -73,43 +103,138 @@ export class MapBox {
       next: (data) => {
         console.log('Response:', data);
 
-        if (this.currentHighlightLayer) {
-          this.map.removeLayer(this.currentHighlightLayer);
-          this.currentHighlightLayer = null;
+        if (this.countryLayer) {
+          this.map.removeLayer(this.countryLayer);
+          this.countryLayer = null;
         }
 
-        this.currentHighlightLayer = L.geoJSON(data.geometry, { style: { color: 'green' } });
-        this.currentHighlightLayer.addTo(this.map);
+        if (this.guessedCountryLayer) {
+          this.map.removeLayer(this.guessedCountryLayer);
+          this.guessedCountryLayer = null;
+        }
 
-        this.selectedCountry.set({
-          anthemKey: Date.now(),
-          flag: data.flag,
-          countryName: data.name,
-          countryCapital: data.capitalCity,
-          anthemLabel: data.anthemLabel,
-          anthemAudio: data.anthemAudio
-        })
+        if (this.gameMode().gameMode) {
+          if (this.countryToGuess().countryName === data.name) {
+            this.countryLayer = this.L.geoJSON(data.geometry, { style: { color: 'green' } });
+            this.setSelectedCountry(data);
+            this.playAnthem();
+          } else {
+            this.countryLayer = this.L.geoJSON(data.geometry, { style: { color: 'red' } });
+            this.guessedCountryLayer = this.L.geoJSON(this.countryToGuess().geometry, { style: { color: 'blue' } });
+            this.guessedCountryLayer.addTo(this.map);
+          }
+          this.countryLayer.addTo(this.map);
+        } else {
+          this.countryLayer = this.L.geoJSON(data.geometry, { style: { color: 'green' } });
+          this.countryLayer.addTo(this.map);
 
-        setTimeout(() => {
-          const player = this.audioPlayer.nativeElement;
-          player.load();
-          player
-            .play()
-            .catch((err) => console.warn('Autoplay blocked:', err));
-        }, 500);
+          this.setSelectedCountry(data);
+          this.playAnthem();
+        }
       },
       error: (err) => {
+        this.selectedCountry.set({
+          anthemKey: 0,
+          flag: "",
+          countryName: "",
+          countryCapital: "",
+          anthemLabel: "",
+          anthemAudio: ""
+        })
         console.error('Error:', err);
       },
     });
   }
 
-  resetHighlight(e: any) {
-    this.geoJson.resetStyle(e.target);
+  getCountryToGuessData() {
+    this.countryService.getCountryToGuess().subscribe({
+      next: (data) => {
+        console.log('Response:', data);
+
+        this.countryToGuess.set({
+          anthemKey: Date.now(),
+          flag: data.flag,
+          countryName: data.name,
+          countryCapital: data.capitalCity,
+          anthemLabel: data.anthemLabel,
+          anthemAudio: data.anthemAudio,
+          geometry: data.geometry,
+        })
+      },
+      error: (err) => {
+        this.countryToGuess.set({
+          anthemKey: 0,
+          flag: "",
+          countryName: "",
+          countryCapital: "",
+          anthemLabel: "",
+          anthemAudio: "",
+          geometry: null
+        })
+        console.error('Error:', err);
+      },
+    });
   }
 
-  addStrike(L: any, lat: number, lng: number) {
-    L.circleMarker([lat, lng], { color: 'red', radius: 5 }).addTo(this.map);
+  clearMap() {
+    this.selectedCountry.set({
+      anthemKey: 0,
+      flag: "",
+      countryName: "",
+      countryCapital: "",
+      anthemLabel: "",
+      anthemAudio: ""
+    });
+
+    this.countryToGuess.set({
+      anthemKey: 0,
+      flag: "",
+      countryName: "",
+      countryCapital: "",
+      anthemLabel: "",
+      anthemAudio: "",
+      geometry: null
+    });
+
+    if (this.countryLayer) {
+      this.map.removeLayer(this.countryLayer);
+      this.countryLayer = null;
+    }
+
+    if (this.guessedCountryLayer) {
+      this.map.removeLayer(this.guessedCountryLayer);
+      this.guessedCountryLayer = null;
+    }
+  }
+
+  onGameButtonHandler() {
+    this.clearMap();
+    this.gameMode.set({ gameMode: true });
+    this.updateBaseMap("gameMode");
+    this.getCountryToGuessData();
+  }
+
+  guessAnotherCountryHandler() {
+    this.clearMap();
+    this.getCountryToGuessData();
+  }
+
+  onExploreButtonHandler() {
+    this.clearMap();
+    this.gameMode.set({ gameMode: false });
+    this.updateBaseMap("exploreMode");
+  }
+
+  private updateBaseMap(styleKey: string): void {
+    if (this.tileLayer) {
+      this.map.removeLayer(this.tileLayer);
+    }
+
+    const url = styleKey === 'gameMode'
+      ? 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png'
+      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+    this.tileLayer = this.L.tileLayer(url, { attribution: '...' }).addTo(this.map);
   }
 
   ngOnDestroy(): void {

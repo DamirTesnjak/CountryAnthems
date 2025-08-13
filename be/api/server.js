@@ -60,6 +60,30 @@ app.get("/which-country", async (req, res) => {
   }
 });
 
+app.get("/random-country", async (req, res) => {
+  const sql = `
+    SELECT name_en, ST_AsGeoJSON(geom) AS geom, country_iso, capital_city, anthem_label, anthem_audio
+    FROM countries
+    ORDER BY random()
+    LIMIT 1
+  `;
+
+  try {
+    const { rows } = await pool.query(sql);
+    res.json({
+      name: rows[0].name_en || "",
+      geometry: JSON.parse(rows[0].geom),
+      flag: `https://flagcdn.com/w640/${rows[0].country_iso.toLowerCase()}.png`,
+      capitalCity: rows[0].capital_city || "",
+      anthemAudio: "",
+      anthemLabel: "",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

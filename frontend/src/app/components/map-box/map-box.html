@@ -1,28 +1,85 @@
 <div id="map">
 </div>
+<div class="controler">
+    <span>
+        <button (click)="onGameButtonHandler()">Game</button>
+        <button (click)="onExploreButtonHandler()">Explore</button>
+    </span>
+     @if (!gameMode().gameMode) {
+        <span>
+            Mode: Explore
+        </span>
+    } @else {
+        <span>
+            Mode: Game
+        </span>
+    }
+</div>
 <div class="country-dialog">
-    <img [src]="selectedCountry().flag" width="350px">
-    <div class="country-title">
-        {{ selectedCountry().countryName }}
-    </div>
-    <div class="country-capital">
-        Capital
-    </div>
-    <div class="country-capital-label">{{ selectedCountry().countryCapital }}</div>
-    <div class="national-anthem-text">
-        Anthem
-    </div>
-    <div class="national-anthem-label">
-        {{ selectedCountry().anthemLabel }}
-    </div>
-    <div class="audio-controler">
-        <audio #audioPlayer [attr.key]="selectedCountry().anthemKey" controls>
-        <source [src]="selectedCountry().anthemAudio" type="audio/ogg">
-        Your browser does not support the audio element.
-    </audio> 
-    <div class="source">
-        <div>Source of anthems: <a href="https://nationalanthems.info/" target="_blank">nationalanthems.info</a></div>
-        <div>Source of flags: <a href="https://flagpedia.net/" target="_blank">flagpedia.net</a></div>
-    </div>
-    </div> 
+    @if (!gameMode().gameMode) {
+        @if (selectedCountry().countryName.length > 0) {
+            <img [src]="selectedCountry().flag" width="350px">
+            <div class="country-title">
+                {{ selectedCountry().countryName }}
+            </div>
+            <div class="country-capital">
+                Capital
+            </div>
+            <div class="country-capital-label">{{ selectedCountry().countryCapital }}</div>
+            <div class="national-anthem-text">
+                Anthem
+            </div>
+            <div class="national-anthem-label">
+                {{ selectedCountry().anthemLabel }}
+            </div>
+            <div class="audio-controler">
+                <audio #audioPlayer [attr.key]="selectedCountry().anthemKey" controls>
+                    <source [src]="selectedCountry().anthemAudio" type="audio/ogg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div> 
+            <div class="source">
+                <div>Source of anthems: <a href="https://nationalanthems.info/" target="_blank">nationalanthems.info</a></div>
+                <div>Source of flags: <a href="https://flagpedia.net/" target="_blank">flagpedia.net</a></div>
+            </div>
+        } @else {
+            <div class="country-title">
+                Select a country
+            </div>
+        }
+    } @else {
+        @if (countryToGuess().countryName.length > 0) {
+            <img [src]="countryToGuess().flag" width="350px">
+            <div class="country-title">
+                {{ countryToGuess().countryName }}
+            </div>
+            <div class="country-capital">
+                Capital
+            </div>
+            <div class="country-capital-label">{{ countryToGuess().countryCapital }}</div>
+            <div class="national-anthem-text">
+                Anthem
+            </div>
+            <div class="national-anthem-label">
+                {{ selectedCountry().anthemLabel }}
+            </div>
+            <div class="audio-controler">
+                <audio #audioPlayer [attr.key]="selectedCountry().anthemKey" controls>
+                    <source [src]="selectedCountry().anthemAudio" type="audio/ogg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div> 
+            <div class="source">
+                <div>Source of anthems: <a href="https://nationalanthems.info/" target="_blank">nationalanthems.info</a></div>
+                <div>Source of flags: <a href="https://flagpedia.net/" target="_blank">flagpedia.net</a></div>
+            </div>
+            <div class="next-country-button">
+                <button (click)="guessAnotherCountryHandler()">Next country</button>
+            </div>
+        } @else {
+            <div class="country-title">
+                Select a country
+            </div>
+        }
+    }
 </div>

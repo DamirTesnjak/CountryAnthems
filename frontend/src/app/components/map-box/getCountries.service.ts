@@ -15,4 +15,9 @@ export class CountryService {
         const url = `${this.baseUrl}/which-country?lat=${bodyReq.lat}&lng=${bodyReq.lng}`;
         return this.http.get(url);
     }
+
+    getCountryToGuess(): Observable<any> {
+        const url = `${this.baseUrl}/random-country`;
+        return this.http.get(url);
+    }
 }
