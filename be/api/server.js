@@ -52,7 +52,7 @@ app.get("/which-country", async (req, res) => {
       flag: `https://flagcdn.com/w640/${rows[0].country_iso.toLowerCase()}.png`,
       capitalCity: rows[0].capital_city || "",
       anthemAudio: rows[0].anthem_audio || "",
-      anthemLabel: rows[0].anthem_label,
+      anthemLabel: rows[0].anthem_label || "",
     });
   } catch (err) {
     console.error(err);
