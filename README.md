@@ -1,59 +1,50 @@
-# StormTracker
+# Country Anthems
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.0.
+An interactive app to explore and guess national anthems.
 
-## Development server
+## Installation
 
-To start a local development server, run:
+Clone this repository
 
-```bash
-ng serve
-```
+> git clone https://github.com/DamirTesnjak/CountryAnthems
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Running with the docker container
 
-## Code scaffolding
+- Install any docker hosting provider, such as **[Docker](https://www.docker.com/)**
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Run in terminal
 
-```bash
-ng generate component component-name
-```
+  > docker-compose up
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- Use
 
-```bash
-ng generate --help
-```
+  > docker-compose up --build
 
-## Building
+  when you made changes in original source code
 
-To build the project run:
+- Visit the app at http://localhost:4000
 
-```bash
-ng build
-```
+## Usage
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The app has two modes:
 
-## Running unit tests
+- explorer mode, select a country for anthem to be played
+- game mode, guess the country on a map. On correct selection the anthem plays
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+App supports English language
 
-```bash
-ng test
-```
+## Data
 
-## Running end-to-end tests
+Sources:
 
-For end-to-end (e2e) testing, run:
+Flags: https://flagpedia.net/
+Anthems: https://nationalanthems.info/
 
-```bash
-ng e2e
-```
+Country borders was aquired from https://overpass-turbo.eu/ with the following query:
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+[out:json][timeout:180];
+relation
+["boundary"="administrative"]
+["admin_level"="2"]
+["ISO3166-1"~"."]; // Only countries with ISO code
+out geom;
