@@ -7,7 +7,7 @@ const { Pool } = pkg;
 const app = express();
 const pool = new Pool({
   user: process.env.POSTGRES_USER || "postgres",
-  host: "localhost",
+  host: "backend-postgis",
   database: process.env.POSTGRES_DB || "geo",
   password: process.env.POSTGRES_PASSWORD || "postgres",
   port: 5432,
@@ -16,8 +16,8 @@ const pool = new Pool({
 
 app.use(
   cors({
-    origin: "http://localhost:4200", // your frontend
-    methods: ["GET", "OPTIONS"],
+    origin: ["http://localhost:4000", "http://localhost:4200"],
+    methods: ["GET"],
     allowedHeaders: ["Content-Type", "Accept"],
   })
 );
@@ -42,9 +42,6 @@ app.get("/which-country", async (req, res) => {
 
   try {
     const { rows } = await pool.query(sql, [lng, lat]);
-    if (!rows.length) {
-      return res.status(404).json({ error: "No country found" });
-    }
     res.json({
       name: rows[0].name_en || "",
       geometry: JSON.parse(rows[0].geom),
@@ -86,7 +83,7 @@ app.get("/random-country", async (req, res) => {
   }
 });
 
-const port = 3000;
+const port = 5001;
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

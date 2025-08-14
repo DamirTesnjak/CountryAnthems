@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: ./fe/Dockerfile
     ports:
-       - "4200:4200"
+       - "4000:4000"
     networks:
       - app_network
   backend-server:
@@ -14,7 +14,7 @@ services:
       context: .
       dockerfile: ./be/api/Dockerfile
     ports:
-     - "3000:3000"
+     - "5001:5001"
     restart: "unless-stopped"
     depends_on:
     - backend-postgis

@@ -51,11 +51,12 @@ export class MapBox {
   })
 
   async ngAfterViewInit() {
-    if (typeof window !== 'undefined') {
-      const L = await import('leaflet');
-      this.L = L;
-      this.initMap();
+    if (typeof window === 'undefined') {
+      return;
     }
+    const leafletModule = await import('leaflet');
+    this.L = (leafletModule as any).default ?? leafletModule;
+    this.initMap();
   }
 
   private initMap(): void {
@@ -64,7 +65,7 @@ export class MapBox {
       zoom: 5
     });
 
-    this.tileLayer = this.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    this.tileLayer = this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB'
     }).addTo(this.map);

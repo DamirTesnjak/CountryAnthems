@@ -10,4 +10,4 @@ COPY frontend ./
 
 RUN npm run build
 
-CMD ["npm", "run", "serve", "-p", "4200", "-a", "0.0.0.0"]
+CMD ["npm", "run", "serve", "-p", "4000", "-a", "0.0.0.0"]

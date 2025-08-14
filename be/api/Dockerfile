@@ -6,6 +6,6 @@ COPY be/api/package.json ./package.json
 COPY be/api/server.js ./server.js
 RUN npm install
 
-EXPOSE 3000
+EXPOSE 5001
 
 CMD ["node", "server.js"]

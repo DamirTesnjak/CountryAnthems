@@ -8,7 +8,7 @@ import { Observable } from "rxjs";
 })
 
 export class CountryService {
-    private baseUrl = "http://localhost:3000";
+    private baseUrl = "http://localhost:5001";
     constructor(private http: HttpClient) { }
 
     getCountry(bodyReq: IBodyRequest): Observable<any> {
