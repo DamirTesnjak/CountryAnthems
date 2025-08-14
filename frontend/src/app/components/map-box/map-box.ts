@@ -1,6 +1,9 @@
 import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CountryService } from './getCountries.service';
+import { DialogService } from '../../dialog.service';
+import { DialogComponentExplorerMode } from '../dialog-component/dialog-component-explorer-mode';
+import { DialogComponentGameMode } from '../dialog-component/dialog-component-game-mode';
 
 @Component({
   selector: 'app-map-box',
@@ -18,6 +21,7 @@ export class MapBox {
   private tileLayer!: any;
   private wsSub!: Subscription;
   private countryService = inject(CountryService);
+  private dialogService = inject(DialogService)
   private countryLayer: any = null;
   private guessedCountryLayer: any = null;
 
@@ -50,6 +54,29 @@ export class MapBox {
     geometry: null,
   })
 
+  showDialogExplorerMode() {
+    const dialogProps = {
+      data: {
+        dialogTitle: "Country anthems!",
+        dialogText: "Click on the country on the map to listen to an anthem!",
+      }
+    }
+    this.dialogService.openDialog(DialogComponentExplorerMode, dialogProps);
+  }
+
+  showDialogGameMode() {
+    const dialogProps = {
+      data: {
+        dialogTitle: "Country anthems!",
+        dialogText: `
+          Click on the country on the map to listen to an anthem!
+          If you click on correct country the anthem will play!
+          You may skip country by clicking "Skip country" button or stop guessing anytime on by clicking "Explore" button!`,
+      }
+    }
+    this.dialogService.openDialog(DialogComponentGameMode, dialogProps);
+  }
+
   async ngAfterViewInit() {
     if (typeof window === 'undefined') {
       return;
@@ -57,6 +84,7 @@ export class MapBox {
     const leafletModule = await import('leaflet');
     this.L = (leafletModule as any).default ?? leafletModule;
     this.initMap();
+    this.showDialogExplorerMode();
   }
 
   private initMap(): void {
@@ -213,6 +241,7 @@ export class MapBox {
     this.gameMode.set({ gameMode: true });
     this.updateBaseMap("gameMode");
     this.getCountryToGuessData();
+    this.showDialogGameMode();
   }
 
   guessAnotherCountryHandler() {
@@ -224,6 +253,7 @@ export class MapBox {
     this.clearMap();
     this.gameMode.set({ gameMode: false });
     this.updateBaseMap("exploreMode");
+    this.showDialogExplorerMode();
   }
 
   private updateBaseMap(styleKey: string): void {

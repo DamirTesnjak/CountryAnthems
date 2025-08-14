@@ -38,6 +38,7 @@
           },
           "configurations": {
             "production": {
+              "scripts": ["node_modules/leaflet/dist/leaflet.js"],
               "budgets": [
                 {
                   "type": "initial",

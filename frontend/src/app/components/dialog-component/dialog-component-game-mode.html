@@ -1,0 +1,26 @@
+<div class="dialog-container">
+    <h2 mat-dialog-title>{{dialogTitle}}</h2>
+    <mat-dialog-content>
+        {{dialogText}}
+        <div class="legend">
+            <span>
+                <div class="correct-country"></div>
+            </span>
+            <span>You selected correct country</span>
+        </div>
+        <div class="legend">
+            <span>
+                <div class="wrong-country"></div>
+            </span>
+            <span>Wrong country selected</span>
+        </div>
+        <div class="legend">
+            <span>
+                <div class="should-country"></div>
+            </span><span>Correct country to be selected</span>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button class="button" (click)="onNoClick()">OK</button>
+    </mat-dialog-actions>
+</div>

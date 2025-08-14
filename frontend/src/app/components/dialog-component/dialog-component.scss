@@ -1,0 +1,62 @@
+.dialog-container {
+    display: block;
+    border-radius: 0px;
+
+    h2 {
+      padding: 0px 10px;
+      text-align: center;
+    }
+
+    mat-dialog-content {
+      padding: 0px 15px;
+
+      .legend {
+        display: flex;
+        flex-direction: row;
+        margin: 5px 5px 5px 0px;
+      }
+
+      .correct-country {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+        background-color: #009933;
+        opacity: 0.5;
+        border: 3px solid  #009933;
+      }
+
+      .wrong-country {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+        background-color:  #cc3300;
+        opacity: 0.5;
+        border: 3px solid  #cc3300;
+      }
+
+      .should-country {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+        background-color: #0066ff;
+        opacity: 0.5;
+        border: 3px solid  #0066ff;
+      }
+    }
+
+    mat-dialog-actions {
+        justify-content: center;
+
+        .button {
+            height: 25px;
+            margin-left: 10px;
+            padding: 0px 10px 0px 10px;
+            background-color: #808080;
+            font-size: 1.0rem;
+            color: #fff;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+    }
+}
