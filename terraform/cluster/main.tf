@@ -47,7 +47,7 @@ resource "aws_ssm_parameter" "password" {
   value = random_string.password.result
 }
 
-resource "aws_db_subnet_group" "country-anthems-database" {
+resource "aws_db_subnet_group" "country_anthems_database_subnets" {
   name       = "education"
   subnet_ids = [
     aws_subnet.private-database-us-west-2a.id,
@@ -59,6 +59,33 @@ resource "aws_db_subnet_group" "country-anthems-database" {
   }
 }
 
+resource "aws_security_group" "security_group_db" {
+  name        = "Security_DB"
+  description = "Security group for database"
+  vpc_id      = aws_vpc.country-anthems-vpc.id
+
+  tags = {
+    Name = "allow_tls"
+  }
+}
+
+# allowing connection to DB
+resource "aws_vpc_security_group_ingress_rule" "db_allow_private" {
+  description                  = "Allow private subnet to access db"
+  from_port                    = 5432
+  ip_protocol                  = "tcp"
+  security_group_id            = aws_security_group_db.security_group_db.id
+  to_port                      = 5432
+}
+
+# allowing output from DB
+resource "aws_vpc_security_group_egress_rule" "db_allow_private" {
+  description  = "Allow private subnet from db"
+  from_port   = 5432
+  ip_protocol = "tcp"
+  security_group_id = aws_security_group_db.security_group_db.id
+  to_port     = 5432
+}
 
 resource "aws_db_instance" "postgres" {
   allocated_storage    = 1
@@ -69,13 +96,15 @@ resource "aws_db_instance" "postgres" {
   db_name              = "country-anthems-postgres-database"
   engine               = "postgres"
   engine_version       = "17.6"
-    iam_database_authentication_enabled = false
+  iam_database_authentication_enabled = false
   instance_class       = "db.t4g.micro"
   username             = "postgres"
   password             = random_string.password.result
   parameter_group_name = "default.postgres17"
+  db_subnet_group_name  = aws_db_subnet_group.country_anthems_database_subnets
   publicly_accessible = false
   skip_final_snapshot  = true
+  vpc_security_group_ids = [aws_security_group.security_group_db.id]
 }
 
 resource "null_resource" "enable_postgis" {
@@ -153,6 +182,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.country_anthems_vpc.id
 }
 
+# connecting S3 bucket to VPC
 resource "aws_vpc_endpoint" "country_anthems_s3_bucket" {
     vpc_id = aws_vpc.country_anthems_vpc.id
     service_network_arn = data.aws_s3_bucket.country_anthems_s3_bucket.arn
