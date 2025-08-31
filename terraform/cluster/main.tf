@@ -62,6 +62,11 @@ data "aws_ssm_parameter" "postgres_password" {
   name = "postgres_password"
 }
 
+resource "aws_cloudwatch_log_group" "country_anthem_cloudwatch_log_group" {
+  name              = "country_anthem_cloudwatch_log_group"
+  retention_in_days = 10
+}
+
 resource "aws_esc_task_definition" "country_anthem_api_service" {
   family = "country_anthem_api_service"
   container_definitions = jsonencode([
@@ -89,13 +94,19 @@ resource "aws_esc_task_definition" "country_anthem_api_service" {
         {
           "name": "POSTGRES_PASSWORD"
           "valueFrom": data.aws_ssm_parameter.postgres_password.arn
+        },
+        {
+          "name": "ORIGIN"
+          "valueFrom": [
+            "https://${aws_s3_bucket.country_anthems_s3_bucket.bucket_domain_name}"
+          ]
         }
       ]
 
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.this.name
+          "awslogs-group"         = aws_cloudwatch_log_group.country_anthem_cloudwatch_log_group.name
           "awslogs-region"        = data.aws_region.this.name
           "awslogs-stream-prefix" = "svc"
         }
@@ -104,13 +115,43 @@ resource "aws_esc_task_definition" "country_anthem_api_service" {
   ])
 }
 
+
+data "aws_iam_policy_document" "task_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      identifiers = ["ecs-tasks.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_iam_role" "country_anthem_api_service" {
+  assume_role_policy = data.aws_iam_policy_document.service_assume_role.json
+  name               = "country_anthem_api-service"
+}
+
+resource "aws_iam_role_policy_attachment" "country_anthem_api_service" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
+  role       = aws_iam_role.country_anthem_api_service.name
+}
+
+resource "aws_lb_target_group" "country-anthems-service" {
+  deregistration_delay              = 60
+  load_balancing_cross_zone_enabled = true
+  port                              = 5001
+  protocol                          = "HTTP"
+  vpc_id                            = aws_vpc.country-anthems-vpc.id
+}
+
 resource "aws_ecs_service" "country-anthems-api-service" {
   name            = "country-anthems-service"
   cluster         = aws_ecs_cluster.api.id
   task_definition = aws_ecs_task_definition.country_anthem_api_service.arn
   desired_count   = 1
-  iam_role        = aws_iam_role.foo.arn
-  depends_on      = [aws_iam_role_policy.foo]
+  iam_role        = aws_iam_role.country_anthem_api_service.arn
+  depends_on = [aws_iam_role_policy_attachment.country_anthem_api_service]
 
   capacity_provider_strategy {
     base              = 1
@@ -120,13 +161,10 @@ resource "aws_ecs_service" "country-anthems-api-service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.country-anthems-service.arn
-    container_name   = "mongo"
-    container_port   = 8080
+    container_name   = "country_anthem_api_service"
+    container_port   = 5001
   }
-    depends_on = [aws_iam_role_policy_attachment.service]
 }
-
-
 
 # S3 - bucket configs
 
@@ -155,6 +193,27 @@ resource "aws_s3_bucket_versioning" "this" {
   bucket = aws_s3_bucket.country_anthems_s3_bucket.id
   versioning_configuration {
     status = "Disabled"
+  }
+}
+
+resource "aws_s3_bucket_website_configuration" "example" {
+  bucket = aws_s3_bucket.country_anthems_s3_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
+  }
+
+  routing_rule {
+    condition {
+      key_prefix_equals = "docs/"
+    }
+    redirect {
+      replace_key_prefix_with = "documents/"
+    }
   }
 }
 
