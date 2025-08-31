@@ -1,8 +1,131 @@
-resource "aws_ecr_repository" "country_anthems_api_docker_image" {
+# ECR - settings
+
+resource "aws_ecr_repository" "country_anthems_api_repository" {
     name = var.ecr_repository_name_api
     image_tag_mutability = "IMMUTABLE"
     encryption_type = "AES256"
 }
+
+# API settings
+resource "aws_ecs_cluster" "api" {
+  name = "country-anthems-api"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}
+
+resource "aws_subnet" "API-private-us-west-2c" {
+  vpc_id     = aws_vpc.country-anthems-vpc.id
+  cidr_block = "10.0.48.0/20"
+
+  tags = {
+    Name = "private-us-west-2a"
+  }
+}
+
+resource "aws_security_group" "security_group_api" {
+  name        = "Security_API"
+  description = "Security group for API"
+  vpc_id      = aws_vpc.country-anthems-vpc.id
+
+  tags = {
+    Name = "allow_tls"
+  }
+}
+
+data "aws_caller_identity" "this" {}
+data "aws_region" "this" {}
+data "aws_ecr_repository" "country_anthems_api_repository" {
+  name = var.ecr_repository_name_api
+}
+
+data "aws_ecr_image" "country_anthem_api_image" {
+  repository_name = var.ecr_repository_name_api
+  image_tag       = "latest"
+}
+
+data "aws_ssm_parameter" "postgres_user" {
+  name = "postgres_user"
+}
+
+data "aws_ssm_parameter" "postgres_host" {
+  name = "postgres_host"
+}
+
+data "aws_ssm_parameter" "postgres_db" {
+  name = "postgres_db"
+}
+
+data "aws_ssm_parameter" "postgres_password" {
+  name = "postgres_password"
+}
+
+resource "aws_esc_task_definition" "country_anthem_api_service" {
+  family = "country_anthem_api_service"
+  container_definitions = jsonencode([
+    {
+      image = "${data.aws_ecr_repository.country_anthems_api_repository.repository_url}:${data.aws_ecr_image.country_anthem_api_image.image_tags[0]}"
+      cpu = 0.5
+      memory = 1024
+      essential = true
+      name = "country_anthem_api_service"
+      portMappins = [{ containerPort = 5001 }] #the app listens to a port inside container
+
+      secrets = [
+        {
+          "name": "POSTGRES_USER"
+          "valueFrom": data.aws_ssm_parameter.postgres_user.arn
+        },
+        {
+          "name": "POSTGRES_HOST"
+          "valueFrom": data.aws_ssm_parameter.postgres_host.arn
+        },
+        {
+          "name": "POSTGRES_DB"
+          "valueFrom": data.aws_ssm_parameter.postgres_db.arn
+        },
+        {
+          "name": "POSTGRES_PASSWORD"
+          "valueFrom": data.aws_ssm_parameter.postgres_password.arn
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.this.name
+          "awslogs-region"        = data.aws_region.this.name
+          "awslogs-stream-prefix" = "svc"
+        }
+      }
+    }
+  ])
+}
+
+resource "aws_ecs_service" "country-anthems-api-service" {
+  name            = "country-anthems-service"
+  cluster         = aws_ecs_cluster.api.id
+  task_definition = aws_ecs_task_definition.country_anthem_api_service.arn
+  desired_count   = 1
+  iam_role        = aws_iam_role.foo.arn
+  depends_on      = [aws_iam_role_policy.foo]
+
+  capacity_provider_strategy {
+    base              = 1
+    capacity_provider = "country-anthems-api-service-spot"
+    weight            = 100
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.country-anthems-service.arn
+    container_name   = "mongo"
+    container_port   = 8080
+  }
+    depends_on = [aws_iam_role_policy_attachment.service]
+}
+
 
 
 # S3 - bucket configs
@@ -160,7 +283,7 @@ resource "aws_subnet" "private-database-us-west-2b" {
 }
 
 
-resource "aws_subnet" "private-us-west-2a" {
+resource "aws_subnet" "private-us-west-2c" {
   vpc_id     = aws_vpc.country-anthems-vpc.id
   cidr_block = "10.0.48.0/20"
 
@@ -169,7 +292,7 @@ resource "aws_subnet" "private-us-west-2a" {
   }
 }
 
-resource "aws_subnet" "private-us-west-2b" {
+resource "aws_subnet" "private-us-west-2d" {
   vpc_id     = aws_vpc.country-anthems-vpc.id
   cidr_block = "10.0.64.0/20"
 
