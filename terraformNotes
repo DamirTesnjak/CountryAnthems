@@ -1,0 +1,61 @@
+The provider block configures options that apply to all resources managed by your provider, such as the region to create them in. This provider block configures the aws provider. The label of the provider block corresponds to the name of the provider in the required_providers list in your terraform block.
+
+provider "aws" {
+region = "us-west-2"
+}
+
+data blocks - to query your cloud provider for information about other resources.
+
+example:
+data "aws_ami" "ubuntu" {
+most_recent = true
+
+filter {
+name = "name"
+values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+}
+
+owners = ["099720109477"] # Canonical
+}
+
+A resource block defines components of your infrastructure. The example configuration defines a resource block to create an AWS EC2 instance.
+
+resource "aws_instance" "app_server" {
+ami = data.aws_ami.ubuntu.id
+instance_type = "t2.micro"
+
+tags = {
+Name = "learn-terraform"
+}
+}
+
+Input variables let you parametrize the behavior of your Terraform configuration.
+
+variable "instance_name" {
+description = "Value of the EC2 instance's Name tag."
+type = string
+default = "learn-terraform"
+}
+
+Output values allow you to access attributes from your Terraform configuration and consume their values with other automation tools or workflows.
+
+output "instance_hostname" {
+description = "Private DNS name of the EC2 instance."
+value = aws_instance.app_server.private_dns
+}
+
+Modules are reusable sets of configuration. Use modules to consistently manage complex infrastructure deployments that include multiple resources and data sources. Like providers, you can source modules from the Terraform Registry. You can also create your own modules and share them within your organization.
+
+module "vpc" {
+source = "terraform-aws-modules/vpc/aws"
+version = "5.19.0"
+
+name = "example-vpc"
+cidr = "10.0.0.0/16"
+
+azs = ["us-west-2a", "us-west-2b", "us-west-2c"]
+private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+public_subnets = ["10.0.101.0/24"]
+
+enable_dns_hostnames = true
+}

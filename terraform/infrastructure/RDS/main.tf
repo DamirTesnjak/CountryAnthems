@@ -1,0 +1,47 @@
+resource "random_string" "password" {
+  length  = 32
+  special = false
+}
+
+resource "aws_ssm_parameter" "password" {
+  name  = "/${var.name}/database/password"
+  type  = "SecureString"
+  value = random_string.password.result
+}
+
+resource "aws_db_instance" "this" {
+  allocated_storage    = 1
+  create_db_option_group              = false
+  create_db_parameter_group           = false
+  create_db_subnet_group              = false
+  create_monitoring_role              = false
+  db_name              = "${var.name}-postgres-database"
+  engine               = "postgres"
+  engine_version       = "17.6"
+  iam_database_authentication_enabled = false
+  instance_class       = "db.t4g.micro"
+  username             = "${var.db_username}"
+  password             = random_string.password.result
+  parameter_group_name = "default.postgres17"
+  db_subnet_group_name  = var.db_subnet_group_name
+  publicly_accessible = false
+  skip_final_snapshot  = true
+  vpc_security_group_ids = [
+    var.security_group_db_id
+  ]
+}
+
+resource "null_resource" "enable_postgis" {
+  depends_on = [aws_db_instance.this]
+
+  provisioner "local-exec" {
+    command = <<EOT
+PGPASSWORD=${random_string.password.result} psql \
+  --host=${aws_db_instance.this.address} \
+  --port=5432 \
+  --username=${aws_db_instance.this.username} \
+  --dbname=${aws_db_instance.this.db_name} \
+  -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+EOT
+  }
+}
