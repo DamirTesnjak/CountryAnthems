@@ -13,3 +13,4 @@ module "securityGroup" {
     
     vpc_id = aws_vpc.main.id
     db_port = var.db_port
+}

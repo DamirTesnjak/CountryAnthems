@@ -15,7 +15,7 @@ resource "aws_db_instance" "this" {
   create_db_parameter_group           = false
   create_db_subnet_group              = false
   create_monitoring_role              = false
-  db_name              = "${var.name}-postgres-database"
+  db_name              = "${var.name}-db"
   engine               = "postgres"
   engine_version       = "17.6"
   iam_database_authentication_enabled = false
