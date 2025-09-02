@@ -3,10 +3,6 @@ variable "name" {
     type = string
 }
 
-variable "db_username" {
-    type = string
-}
-
 variable "vpc_name" {
   description = "The name of the VPC"
   type        = string

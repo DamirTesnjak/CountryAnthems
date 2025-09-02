@@ -1,4 +1,4 @@
-variable avalibility_zones {
+variable availability_zones {
   type        = list(string)
 }
 

@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_group" "this" {
   name              = "country_anthem_cloudwatch_log_group"
-  retention_in_days = 10
+  retention_in_days = 30
 }
 
 resource "aws_ecs_cluster" "this" {
@@ -12,7 +12,7 @@ resource "aws_ecs_cluster" "this" {
   }
 }
 
-resource "aws_esc_task_definition" "this" {
+resource "aws_ecs_task_definition" "this" {
   family = "country_anthem_api_service"
   container_definitions = jsonencode([
     {
@@ -52,7 +52,7 @@ resource "aws_esc_task_definition" "this" {
         logDriver = "awslogs"
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.this.name
-          "awslogs-region"        = data.aws_region.this.name
+          "awslogs-region"        = data.aws_region.this.region
           "awslogs-stream-prefix" = "svc"
         }
       }

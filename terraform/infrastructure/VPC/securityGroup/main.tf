@@ -10,7 +10,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_allow_private" {
   cidr_ipv4   = "0.0.0.0/0"
   from_port                    = 80
   ip_protocol                  = "tcp"
-  security_group_id            = aws_security_group_db.security_group_alb.id
+  security_group_id            = aws_security_group.security_group_alb.id
   to_port                      = 80
 }
 
@@ -19,7 +19,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_allow_private" {
   description  = "Allow from ALB"
   cidr_ipv4   = "0.0.0.0/0"
   ip_protocol = "-1"
-  security_group_id = aws_security_group_db.security_group_alb.id
+  security_group_id = aws_security_group.security_group_alb.id
 }
 
 #------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private" {
   from_port                    = var.ecs_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.security_group_alb.id
-  security_group_id            = aws_security_group_db.security_group_ecs.id
+  security_group_id            = aws_security_group.security_group_ecs.id
   to_port                      = var.ecs_port
 }
 
@@ -46,7 +46,7 @@ resource "aws_vpc_security_group_egress_rule" "ecs_allow_private" {
   from_port                    = var.ecs_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.security_group_alb.id
-  security_group_id = aws_security_group_db.security_group_ecs.id
+  security_group_id = aws_security_group.security_group_ecs.id
   to_port                      = var.ecs_port
 }
 
@@ -64,7 +64,7 @@ resource "aws_vpc_security_group_ingress_rule" "db_allow_private" {
   from_port                    = var.db_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.security_group_ecs.id
-  security_group_id            = aws_security_group_db.security_group_db.id
+  security_group_id            = aws_security_group.security_group_db.id
   to_port                      = var.db_port
 }
 
@@ -74,6 +74,6 @@ resource "aws_vpc_security_group_egress_rule" "db_allow_private" {
   from_port   = var.db_port
   ip_protocol = "tcp"
   referenced_security_group_id = aws_security_group.security_group_ecs.id
-  security_group_id = aws_security_group_db.security_group_db.id
+  security_group_id = aws_security_group.security_group_db.id
   to_port     = var.db_port
 }

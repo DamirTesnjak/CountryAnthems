@@ -6,3 +6,7 @@ variable vpc_id {
 variable db_port {
     type = number
 }
+
+variable ecs_port {
+    type = number
+}

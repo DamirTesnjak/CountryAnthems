@@ -4,7 +4,7 @@ resource "random_string" "password" {
 }
 
 resource "aws_ssm_parameter" "password" {
-  name  = "/${var.name}/database/password"
+  name  = "postgres_password"
   type  = "SecureString"
   value = random_string.password.result
 }
@@ -20,7 +20,7 @@ resource "aws_db_instance" "this" {
   engine_version       = "17.6"
   iam_database_authentication_enabled = false
   instance_class       = "db.t4g.micro"
-  username             = "${var.db_username}"
+  username             = "${data.aws_ssm_parameter.postgres_user}"
   password             = random_string.password.result
   parameter_group_name = "default.postgres17"
   db_subnet_group_name  = var.db_subnet_group_name

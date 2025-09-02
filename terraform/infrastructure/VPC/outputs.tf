@@ -1,5 +1,5 @@
 output security_group_db_id {
-    value = module.securityGroup.security_group_db.id
+    value = module.securityGroup.security_group_db_id
 }
 
 output vpc_id {
