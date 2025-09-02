@@ -24,3 +24,14 @@ data "aws_ssm_parameter" "postgres_db" {
 data "aws_ssm_parameter" "postgres_password" {
   name = "postgres_password"
 }
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      identifiers = ["ec2.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}

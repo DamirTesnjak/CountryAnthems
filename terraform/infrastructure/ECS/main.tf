@@ -61,7 +61,7 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_iam_role" "this" {
-  assume_role_policy = data.aws_iam_policy_document.task_assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
   name               = "country_anthem_api_service"
 }
 

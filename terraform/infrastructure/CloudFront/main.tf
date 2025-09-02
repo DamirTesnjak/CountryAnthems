@@ -7,7 +7,7 @@ resource "aws_lb" "this" {
   subnets                    = var.subnets
 
   security_groups = concat(
-    [aws_security_group.security_group_alb.id],
+    [data.aws_security_group.security_group_alb.id],
     var.security_groups,
   )
 }

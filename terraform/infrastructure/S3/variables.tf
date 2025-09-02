@@ -8,6 +8,5 @@ variable "vpc_id" {
 }
 
 variable "cf_id" {
-    description = "CloudFront OAC ID"
     type = string
 }
