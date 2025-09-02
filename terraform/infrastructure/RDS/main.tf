@@ -11,10 +11,6 @@ resource "aws_ssm_parameter" "password" {
 
 resource "aws_db_instance" "this" {
   allocated_storage    = 1
-  create_db_option_group              = false
-  create_db_parameter_group           = false
-  create_db_subnet_group              = false
-  create_monitoring_role              = false
   db_name              = "${var.name}-db"
   engine               = "postgres"
   engine_version       = "17.6"
@@ -23,7 +19,7 @@ resource "aws_db_instance" "this" {
   username             = "${data.aws_ssm_parameter.postgres_user}"
   password             = random_string.password.result
   parameter_group_name = "default.postgres17"
-  db_subnet_group_name  = var.db_subnet_group_name
+  db_subnet_group_name  = var.vpc_name
   publicly_accessible = false
   skip_final_snapshot  = true
   vpc_security_group_ids = [

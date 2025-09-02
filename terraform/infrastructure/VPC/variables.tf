@@ -13,3 +13,7 @@ variable ecs_port {
 variable name {
     type = string
 }
+
+variable alb_port {
+    type = string
+}

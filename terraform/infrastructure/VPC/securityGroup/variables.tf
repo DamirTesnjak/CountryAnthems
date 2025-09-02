@@ -10,3 +10,7 @@ variable db_port {
 variable ecs_port {
     type = number
 }
+
+variable alb_port {
+  type = number
+}

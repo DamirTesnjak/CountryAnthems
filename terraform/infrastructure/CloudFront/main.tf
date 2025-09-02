@@ -14,7 +14,7 @@ resource "aws_lb" "this" {
 
 resource "aws_lb_listener" "app_listener" {
   load_balancer_arn = aws_lb.this.arn
-  port              = 80
+  port              = var.alb_port
   protocol          = "HTTP"
 
   default_action {
@@ -26,7 +26,7 @@ resource "aws_lb_listener" "app_listener" {
 resource "aws_cloudfront_vpc_origin" "this" {
   vpc_origin_endpoint_config {
     arn                    = aws_lb.this.arn
-    http_port              = 80
+    http_port              = var.alb_port
     https_port             = 443
     name                   = "cluster-${var.name}"
     origin_protocol_policy = "http-only"

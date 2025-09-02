@@ -5,6 +5,7 @@ module "vpc" {
   db_port = var.db_port
   name = var.name
   ecs_port = var.ecs_port
+  alb_port = var.alb_port
 }
 
 module "rds" {
@@ -31,4 +32,11 @@ module "ecs" {
   vpc_id = module.vpc.vpc_id
   name = var.name
   port = var.ecs_port
+}
+
+module "cloud_front" {
+  source = "./CloudFront"
+
+  alb_port = var.alb_port
+  name = var.name
 }

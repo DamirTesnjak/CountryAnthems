@@ -23,15 +23,6 @@ resource "aws_db_subnet_group" "country_anthems_database_subnets" {
   }
 }
 
-# VPC configurations
-
-data "aws_region" "current" {}
-
-# get bucket ARN
-data "aws_s3_bucket" "country_anthems_s3_bucket" {
-    arn = aws_s3_bucket.country_anthems_s3_bucket.arn
-}
-
 resource "aws_vpc" "country-anthems-vpc" {
     cidr_block = "10.0.0.0/16"
     instance_tenancy = "default"

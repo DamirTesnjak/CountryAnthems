@@ -8,4 +8,5 @@ module infrastructure {
     name = "country-anthems"
     db_port = 5432
     ecs_port = 8080
+    alb_port = 80
 }

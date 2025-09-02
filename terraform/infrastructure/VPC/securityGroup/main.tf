@@ -8,10 +8,10 @@ resource "aws_security_group" "security_group_alb" {
 resource "aws_vpc_security_group_ingress_rule" "alb_allow_private" {
   description                  = "Allow connection from outside internet to access ALB"
   cidr_ipv4   = "0.0.0.0/0"
-  from_port                    = 80
+  from_port                    = var.alb_port
   ip_protocol                  = "tcp"
   security_group_id            = aws_security_group.security_group_alb.id
-  to_port                      = 80
+  to_port                      = var.alb_port
 }
 
 # allowing output from ALB

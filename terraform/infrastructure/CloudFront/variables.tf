@@ -6,3 +6,7 @@ variable vpc_id {
 variable name {
     type = string
 }
+
+variable alb_port {
+    type = number
+}
