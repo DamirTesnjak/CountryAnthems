@@ -51,11 +51,11 @@ resource "aws_cloudfront_distribution" "country_anthems_distribution" {
   enabled     = true
   price_class = "PriceClass_100"
 
-  origin [{
+  origin = [{
     domain_name = aws_lb.this.dns_name
     origin_id   = "cluster-${var.name}"
 
-    vpc_origin_config {
+    vpc_origin_config = {
       vpc_origin_id = aws_cloudfront_vpc_origin.this.id
     }
   },

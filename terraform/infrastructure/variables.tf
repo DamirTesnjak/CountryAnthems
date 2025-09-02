@@ -13,3 +13,7 @@ variable name {
 variable alb_port {
   type = string
 }
+
+variable cf_id {
+  type = string
+}

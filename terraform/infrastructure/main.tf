@@ -18,6 +18,9 @@ module "rds" {
 
 module "s3" {
   source = "./S3"
+
+  vpc_id = module.vpc.vpc_id
+  cf_id = module.cloud_front.cf_id
 }
 
 module "ecr" {
@@ -39,4 +42,5 @@ module "cloud_front" {
 
   alb_port = var.alb_port
   name = var.name
+  vpc_id = module.vpc.vpc_id
 }

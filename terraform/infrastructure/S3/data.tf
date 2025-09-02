@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "ecs_s3_policy" {
   statement {
     effect = "Allow"
     actions = ["s3:GetObject"]
-    resource = ["${aws_s3_bucket.this.arn}/*"]
+    resources = ["${aws_s3_bucket.this.arn}/*"]
   }
 }
 
@@ -38,6 +38,13 @@ data "aws_iam_policy_document" "ecs_s3_bucket_access" {
   }
 }
 
+data "aws_cloudfront_origin_access_control" "s3_oac" {
+  id = var.cf_id
+}
+data "aws_s3_bucket" "this" {
+  bucket = "${var.name}-bucket"
+}
+
 data "aws_iam_policy_document" "cloudfront_access" {
   statement {
     sid    = "AllowCloudFront"
@@ -45,7 +52,7 @@ data "aws_iam_policy_document" "cloudfront_access" {
 
     principals {
       type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_control.s3_oac.iam_arn]
+      identifiers = [data.aws_cloudfront_origin_access_control.s3_oac.iam_arn]
     }
 
     actions = [
@@ -53,20 +60,12 @@ data "aws_iam_policy_document" "cloudfront_access" {
     ]
 
     resources = [
-      "${aws_s3_bucket.this.arn}/*"
+      "${data.aws_s3_bucket.this.arn}/*"
     ]
   }
 }
 
 data "aws_iam_policy_document" "ecs_s3_cloud_front_merged_policy" {
   source_json = data.aws_iam_policy_document.ecs_s3_bucket_access.json
-
-  statement {
-    for_each = data.aws_iam_policy_document.cloudfront_access.statement
-    sid       = each.value.sid
-    effect    = each.value.effect
-    principals = each.value.principals
-    actions   = each.value.actions
-    resources = each.value.resources
-  }
+  override_json  = data.aws_iam_policy_document.cloudfront_access.statement
 }
