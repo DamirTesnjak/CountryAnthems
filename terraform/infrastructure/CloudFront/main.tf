@@ -2,7 +2,7 @@ resource "aws_lb" "api" {
   name               = "${var.name}-alb"
   internal                   = false
   load_balancer_type         = "application"
-  security_groups = [data.aws_security_group.security_group_alb.id]
+  security_groups = [var.security_group_alb_id]
   subnets                    = var.alb_subnets
   enable_deletion_protection = false
   idle_timeout               = 300

@@ -14,6 +14,7 @@ module "rds" {
   security_group_db_id = module.vpc.security_group_db_id
   name            = var.name
   vpc_name        = module.vpc.vpc_name
+  db_subnets = module.vpc.db_subnets
 }
 
 module "s3" {
@@ -46,5 +47,5 @@ module "cloud_front" {
   name = var.name
   vpc_id = module.vpc.vpc_id
   alb_subnets = module.vpc.alb_subnets
-  db_subnets = module.vpc.db_subnets
+  security_group_alb_id = module.vpc.security_group_alb_id
 }

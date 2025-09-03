@@ -12,3 +12,7 @@ variable "security_group_db_id" {
   description = "The security groups to deploy the database in"
   type        = string
 }
+
+variable "db_subnets" {
+  type = list(string)
+}

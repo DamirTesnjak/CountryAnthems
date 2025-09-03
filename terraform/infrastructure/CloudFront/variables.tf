@@ -14,3 +14,7 @@ variable alb_port {
 variable alb_subnets {
     type = list(string)
 }
+
+variable security_group_alb_id {
+    type = string
+}
