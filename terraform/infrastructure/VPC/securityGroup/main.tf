@@ -6,19 +6,19 @@ resource "aws_security_group" "security_group_alb" {
 
 # allowing connection to ALB
 resource "aws_vpc_security_group_ingress_rule" "alb_allow_private" {
-  description                  = "Allow connection from outside internet to access ALB"
-  cidr_ipv4   = "0.0.0.0/0"
-  from_port                    = var.alb_port
-  ip_protocol                  = "tcp"
-  security_group_id            = aws_security_group.security_group_alb.id
-  to_port                      = var.alb_port
+  description       = "Allow connection from outside internet to access ALB"
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = var.alb_port
+  ip_protocol       = "tcp"
+  security_group_id = aws_security_group.security_group_alb.id
+  to_port           = var.alb_port
 }
 
 # allowing output from ALB
 resource "aws_vpc_security_group_egress_rule" "alb_allow_private" {
-  description  = "Allow from ALB"
-  cidr_ipv4   = "0.0.0.0/0"
-  ip_protocol = "-1"
+  description       = "Allow from ALB"
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
   security_group_id = aws_security_group.security_group_alb.id
 }
 
@@ -42,11 +42,11 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private" {
 
 # allowing output from ECS
 resource "aws_vpc_security_group_egress_rule" "ecs_allow_private" {
-  description  = "Allow private from ecs"
+  description                  = "Allow private from ecs"
   from_port                    = var.ecs_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.security_group_alb.id
-  security_group_id = aws_security_group.security_group_ecs.id
+  security_group_id            = aws_security_group.security_group_ecs.id
   to_port                      = var.ecs_port
 }
 
@@ -70,10 +70,10 @@ resource "aws_vpc_security_group_ingress_rule" "db_allow_private" {
 
 # allowing output from DB
 resource "aws_vpc_security_group_egress_rule" "db_allow_private" {
-  description  = "Allow private from db"
-  from_port   = var.db_port
-  ip_protocol = "tcp"
+  description                  = "Allow private from db"
+  from_port                    = var.db_port
+  ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.security_group_ecs.id
-  security_group_id = aws_security_group.security_group_db.id
-  to_port     = var.db_port
+  security_group_id            = aws_security_group.security_group_db.id
+  to_port                      = var.db_port
 }

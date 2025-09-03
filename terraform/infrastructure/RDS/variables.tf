@@ -1,6 +1,6 @@
 variable "name" {
-    default = "country-anthems"
-    type = string
+  default = "country-anthems"
+  type    = string
 }
 
 variable "vpc_name" {

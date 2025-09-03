@@ -1,12 +1,12 @@
 provider "aws" {
-    region = "us-west-2"
+  region = "us-west-2"
 }
 
-module infrastructure {
-    source = "./infrastructure"
+module "infrastructure" {
+  source = "./infrastructure"
 
-    name = "country-anthems"
-    db_port = 5432
-    ecs_port = 8080
-    alb_port = 80
+  name     = "country-anthems"
+  db_port  = 5432
+  ecs_port = 8080
+  alb_port = 80
 }

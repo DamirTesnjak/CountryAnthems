@@ -1,19 +1,19 @@
 resource "aws_vpc" "main" {
-    cidr_block = "10.0.0.0/16"
-    instance_tenancy = "default"
-    
-    tags = {
-        Name = "main-vpc"
-    }
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"
+
+  tags = {
+    Name = "main-vpc"
+  }
 }
 
 module "securityGroup" {
-    source = "./securityGroup"
-    
-    vpc_id = aws_vpc.main.id
-    db_port = var.db_port
-    ecs_port = var.ecs_port
-    alb_port = var.alb_port
+  source = "./securityGroup"
+
+  vpc_id   = aws_vpc.main.id
+  db_port  = var.db_port
+  ecs_port = var.ecs_port
+  alb_port = var.alb_port
 }
 
 resource "aws_subnet" "public_1_us_west_2a" {

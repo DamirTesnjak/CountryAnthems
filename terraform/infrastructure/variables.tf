@@ -1,15 +1,15 @@
-variable ecs_port {
-  type        = number
-}
-
-variable db_port {
+variable "ecs_port" {
   type = number
 }
 
-variable name {
-    type = string
+variable "db_port" {
+  type = number
 }
 
-variable alb_port {
+variable "name" {
+  type = string
+}
+
+variable "alb_port" {
   type = string
 }

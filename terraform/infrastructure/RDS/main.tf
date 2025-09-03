@@ -20,19 +20,19 @@ resource "aws_db_subnet_group" "rds-subnets" {
 
 
 resource "aws_db_instance" "this" {
-  allocated_storage    = 1
-  db_name              = "${var.name}-db"
-  engine               = "postgres"
-  engine_version       = "17.6"
+  allocated_storage                   = 1
+  db_name                             = "${var.name}-db"
+  engine                              = "postgres"
+  engine_version                      = "17.6"
   iam_database_authentication_enabled = false
-  instance_class       = "db.t4g.micro"
-  username             = "${data.aws_ssm_parameter.postgres_user}"
-  password             = random_string.password.result
-  parameter_group_name = "default.postgres17"
-  db_subnet_group_name  = aws_db_subnet_group.rds-subnets.name
-  publicly_accessible = false
-  skip_final_snapshot  = true
-  vpc_security_group_ids = [var.security_group_db_id]
+  instance_class                      = "db.t4g.micro"
+  username                            = data.aws_ssm_parameter.postgres_user
+  password                            = random_string.password.result
+  parameter_group_name                = "default.postgres17"
+  db_subnet_group_name                = aws_db_subnet_group.rds-subnets.name
+  publicly_accessible                 = false
+  skip_final_snapshot                 = true
+  vpc_security_group_ids              = [var.security_group_db_id]
 }
 
 resource "null_resource" "enable_postgis" {

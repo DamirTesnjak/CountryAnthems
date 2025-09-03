@@ -1,48 +1,48 @@
-output security_group_db_id {
-    value = module.securityGroup.security_group_db_id
+output "security_group_db_id" {
+  value = module.securityGroup.security_group_db_id
 }
 
-output vpc_id {
-    description = "VPC id value"
-    value = aws_vpc.main.id
+output "vpc_id" {
+  description = "VPC id value"
+  value       = aws_vpc.main.id
 }
 
-output vpc_name {
-    description = "VPC name"
-    value = aws_vpc.main.id
+output "vpc_name" {
+  description = "VPC name"
+  value       = aws_vpc.main.id
 }
 
-output alb_subnets {
-    description = "ALB subnets"
-    value = [
-        aws_subnet.public_1_us_west_2a.id,
-        aws_subnet.public_3_us_west_2b.id,
-        aws_subnet.public_5_us_west_2c.id
-    ]
+output "alb_subnets" {
+  description = "ALB subnets"
+  value = [
+    aws_subnet.public_1_us_west_2a.id,
+    aws_subnet.public_3_us_west_2b.id,
+    aws_subnet.public_5_us_west_2c.id
+  ]
 }
 
-output db_subnets {
-    description = "DB subnets"
-    value = [
-        aws_subnet.private_2_us_west_2a.id,
-        aws_subnet.private_4_us_west_2b.id,
-        aws_subnet.private_6_us_west_2c.id
-    ]
+output "db_subnets" {
+  description = "DB subnets"
+  value = [
+    aws_subnet.private_2_us_west_2a.id,
+    aws_subnet.private_4_us_west_2b.id,
+    aws_subnet.private_6_us_west_2c.id
+  ]
 }
 
-output ecs_subnets {
-    description = "ECS subnets"
-    value = [
-        aws_subnet.private_7_us_west_2a.id,
-        aws_subnet.private_8_us_west_2b.id,
-        aws_subnet.private_9_us_west_2c.id
-    ]
+output "ecs_subnets" {
+  description = "ECS subnets"
+  value = [
+    aws_subnet.private_7_us_west_2a.id,
+    aws_subnet.private_8_us_west_2b.id,
+    aws_subnet.private_9_us_west_2c.id
+  ]
 }
 
-output security_group_ecs_id {
-    value = module.securityGroup.security_group_ecs_id
+output "security_group_ecs_id" {
+  value = module.securityGroup.security_group_ecs_id
 }
 
-output security_group_alb_id {
-    value = module.securityGroup.security_group_alb_id
+output "security_group_alb_id" {
+  value = module.securityGroup.security_group_alb_id
 }

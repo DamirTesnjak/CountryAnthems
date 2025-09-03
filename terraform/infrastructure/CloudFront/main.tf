@@ -1,13 +1,13 @@
 resource "aws_lb" "api" {
-  name               = "${var.name}-alb"
+  name                       = "${var.name}-alb"
   internal                   = false
   load_balancer_type         = "application"
-  security_groups = [var.security_group_alb_id]
+  security_groups            = [var.security_group_alb_id]
   subnets                    = var.alb_subnets
   enable_deletion_protection = false
   idle_timeout               = 300
   preserve_host_header       = false
-  }
+}
 
 resource "aws_lb_listener" "app_listener" {
   load_balancer_arn = aws_lb.api.arn
@@ -50,15 +50,15 @@ resource "aws_cloudfront_origin_access_control" "s3_oac" {
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
-  enabled     = true
+  enabled             = true
   default_root_object = "index.html"
-  price_class = "PriceClass_100"
+  price_class         = "PriceClass_100"
 
   origin {
-      domain_name              = data.aws_s3_bucket.frontend.bucket_regional_domain_name
-      origin_id                = "s3-origin-${var.name}"
-      origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
-    }
+    domain_name              = data.aws_s3_bucket.frontend.bucket_regional_domain_name
+    origin_id                = "s3-origin-${var.name}"
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
+  }
 
   origin {
     domain_name = aws_lb.api.dns_name
@@ -83,7 +83,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  ordered_cache_behavior  {
+  ordered_cache_behavior {
     path_pattern           = "/api/*"
     target_origin_id       = "cluster-${var.name}"
     viewer_protocol_policy = "redirect-to-https"

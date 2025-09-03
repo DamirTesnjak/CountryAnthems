@@ -24,38 +24,38 @@ resource "aws_iam_role" "task" {
 
 resource "aws_ecs_task_definition" "api_task" {
   execution_role_arn = aws_iam_role.execution.arn
-  family = "${var.name}-task"
-  task_role_arn = aws_iam_role.task.arn
+  family             = "${var.name}-task"
+  task_role_arn      = aws_iam_role.task.arn
 
   container_definitions = jsonencode([
     {
-      image = "${data.aws_ecr_repository.this.repository_url}:${data.aws_ecr_image.this.image_tags[0]}"
-      cpu = 0.5
-      memory = 1024
-      essential = true
-      name = "${var.name}_api_service"
+      image       = "${data.aws_ecr_repository.this.repository_url}:${data.aws_ecr_image.this.image_tags[0]}"
+      cpu         = 0.5
+      memory      = 1024
+      essential   = true
+      name        = "${var.name}_api_service"
       portMappins = [{ containerPort = 5001 }] #the app listens to a port inside container
 
       secrets = [
         {
-          "name": "POSTGRES_USER"
-          "valueFrom": data.aws_ssm_parameter.postgres_user.arn
+          "name" : "POSTGRES_USER"
+          "valueFrom" : data.aws_ssm_parameter.postgres_user.arn
         },
         {
-          "name": "POSTGRES_HOST"
-          "valueFrom": data.aws_ssm_parameter.postgres_host.arn
+          "name" : "POSTGRES_HOST"
+          "valueFrom" : data.aws_ssm_parameter.postgres_host.arn
         },
         {
-          "name": "POSTGRES_DB"
-          "valueFrom": data.aws_ssm_parameter.postgres_db.arn
+          "name" : "POSTGRES_DB"
+          "valueFrom" : data.aws_ssm_parameter.postgres_db.arn
         },
         {
-          "name": "POSTGRES_PASSWORD"
-          "valueFrom": data.aws_ssm_parameter.postgres_password.arn
+          "name" : "POSTGRES_PASSWORD"
+          "valueFrom" : data.aws_ssm_parameter.postgres_password.arn
         },
         {
-          "name": "ORIGIN"
-          "valueFrom": [
+          "name" : "ORIGIN"
+          "valueFrom" : [
             "https://${var.bucket_domain_name}"
           ]
         }
@@ -84,7 +84,7 @@ resource "aws_iam_role_policy_attachment" "service" {
 }
 
 resource "aws_lb_target_group" "service" {
-  name = "${var.name}-tg"
+  name                              = "${var.name}-tg"
   deregistration_delay              = 60
   load_balancing_cross_zone_enabled = true
   port                              = var.port
@@ -98,9 +98,9 @@ resource "aws_ecs_service" "api" {
   task_definition = aws_ecs_task_definition.api_task.arn
   desired_count   = 1
   iam_role        = aws_iam_role.service.arn
-  depends_on = [aws_iam_role_policy_attachment.service]
+  depends_on      = [aws_iam_role_policy_attachment.service]
 
-   network_configuration {
+  network_configuration {
     subnets         = var.ecs_subnets
     security_groups = [data.aws_security_group.security_group_ecs.id]
   }
