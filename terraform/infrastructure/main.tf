@@ -35,6 +35,8 @@ module "ecs" {
   vpc_id = module.vpc.vpc_id
   name = var.name
   port = var.ecs_port
+  ecs_subnets = module.vpc.ecs_subnets
+  security_group_ecs_id = module.vpc.security_group_ecs_id
 }
 
 module "cloud_front" {

@@ -3,7 +3,7 @@ resource "aws_vpc" "main" {
     instance_tenancy = "default"
     
     tags = {
-        Name = "main"
+        Name = "main-vpc"
     }
 }
 
@@ -79,5 +79,38 @@ resource "aws_subnet" "private_6_us_west_2c" {
 
   tags = {
     Name = "private_6_us_west_2c"
+  }
+}
+
+resource "aws_subnet" "private_7_us_west_2a" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.7.0.0/16"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private_7_us_west_2a"
+  }
+}
+
+resource "aws_subnet" "private_8_us_west_2b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.8.0.0/16"
+  availability_zone       = "us-west-2b"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private_8_us_west_2b"
+  }
+}
+
+resource "aws_subnet" "private_9_us_west_2c" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.9.0.0/16"
+  availability_zone       = "us-west-2c"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private_9_us_west_2c"
   }
 }

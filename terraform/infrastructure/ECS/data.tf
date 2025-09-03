@@ -57,3 +57,7 @@ data "aws_iam_policy_document" "execution_assume_role" {
     }
   }
 }
+
+data "aws_security_group" "security_group_ecs" {
+  id = var.security_group_ecs_id
+}

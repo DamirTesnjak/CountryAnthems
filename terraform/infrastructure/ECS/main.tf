@@ -1,10 +1,10 @@
 resource "aws_cloudwatch_log_group" "this" {
-  name              = "country_anthem_cloudwatch_log_group"
+  name              = "${var.name}_cloudwatch_log_group"
   retention_in_days = 30
 }
 
-resource "aws_ecs_cluster" "this" {
-  name = "country-anthems-api"
+resource "aws_ecs_cluster" "api" {
+  name = "${var.name}-api"
 
   setting {
     name  = "containerInsights"
@@ -14,7 +14,7 @@ resource "aws_ecs_cluster" "this" {
 
 resource "aws_iam_role" "execution" {
   assume_role_policy = data.aws_iam_policy_document.execution_assume_role.json
-  name               = "${local.fullname}-execution"
+  name               = "${var.name}-execution"
 }
 
 resource "aws_iam_role" "task" {
@@ -22,9 +22,9 @@ resource "aws_iam_role" "task" {
   name               = "${var.name}-task"
 }
 
-resource "aws_ecs_task_definition" "this" {
+resource "aws_ecs_task_definition" "api_task" {
   execution_role_arn = aws_iam_role.execution.arn
-  family = "${var.name}_api_service"
+  family = "${var.name}-task"
   task_role_arn = aws_iam_role.task.arn
 
   container_definitions = jsonencode([
@@ -66,7 +66,7 @@ resource "aws_ecs_task_definition" "this" {
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.this.name
           "awslogs-region"        = data.aws_region.this.region
-          "awslogs-stream-prefix" = "svc"
+          "awslogs-stream-prefix" = "api"
         }
       }
     }
@@ -92,13 +92,18 @@ resource "aws_lb_target_group" "service" {
   vpc_id                            = var.vpc_id
 }
 
-resource "aws_ecs_service" "this" {
+resource "aws_ecs_service" "api" {
   name            = "country-anthems-service"
-  cluster         = aws_ecs_cluster.this.id
-  task_definition = aws_ecs_task_definition.this.arn
+  cluster         = aws_ecs_cluster.api.id
+  task_definition = aws_ecs_task_definition.api_task.arn
   desired_count   = 1
   iam_role        = aws_iam_role.service.arn
   depends_on = [aws_iam_role_policy_attachment.service]
+
+   network_configuration {
+    subnets         = var.ecs_subnets
+    security_groups = [data.aws_security_group.security_group_ecs.id]
+  }
 
   capacity_provider_strategy {
     base              = 1
