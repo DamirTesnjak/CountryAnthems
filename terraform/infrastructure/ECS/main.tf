@@ -22,6 +22,36 @@ resource "aws_iam_role" "task" {
   name               = "${var.name}-task"
 }
 
+resource "aws_ssm_parameter" "postgres_user" {
+  name  = "POSTGRES_USER"
+  type  = "SecureString"
+  value = "value"
+}
+
+resource "aws_ssm_parameter" "postgres_host" {
+  name  = "POSTGRES_HOST"
+  type  = "SecureString"
+  value = "value"
+}
+
+resource "aws_ssm_parameter" "postgres_db" {
+  name  = "POSTGRES_DB"
+  type  = "SecureString"
+  value = "value"
+}
+
+resource "aws_ssm_parameter" "postgres_password" {
+  name  = "POSTGRES_PASSWORD"
+  type  = "SecureString"
+  value = "value"
+}
+
+resource "aws_ssm_parameter" "origin" {
+  name  = "ORIGIN"
+  type  = "SecureString"
+  value = "value"
+}
+
 resource "aws_ecs_task_definition" "api_task" {
   execution_role_arn = aws_iam_role.execution.arn
   family             = "${var.name}-task"
@@ -38,26 +68,24 @@ resource "aws_ecs_task_definition" "api_task" {
 
       secrets = [
         {
-          "name" : "POSTGRES_USER"
-          "valueFrom" : data.aws_ssm_parameter.postgres_user.arn
+          "name" : aws_ssm_parameter.postgres_user.name
+          "valueFrom" : aws_ssm_parameter.postgres_user.arn
         },
         {
-          "name" : "POSTGRES_HOST"
-          "valueFrom" : data.aws_ssm_parameter.postgres_host.arn
+          "name" : aws_ssm_parameter.postgres_host.name
+          "valueFrom" : aws_ssm_parameter.postgres_host.arn
         },
         {
-          "name" : "POSTGRES_DB"
-          "valueFrom" : data.aws_ssm_parameter.postgres_db.arn
+          "name" : aws_ssm_parameter.postgres_db.name
+          "valueFrom" : aws_ssm_parameter.postgres_db.arn
         },
         {
-          "name" : "POSTGRES_PASSWORD"
-          "valueFrom" : data.aws_ssm_parameter.postgres_password.arn
+          "name" : aws_ssm_parameter.postgres_password.name
+          "valueFrom" : aws_ssm_parameter.postgres_password.arn
         },
         {
-          "name" : "ORIGIN"
-          "valueFrom" : [
-            "https://${var.bucket_domain_name}"
-          ]
+          "name" : aws_ssm_parameter.origin.name
+          "valueFrom" : [aws_ssm_parameter.origin.value]
         }
       ]
 
