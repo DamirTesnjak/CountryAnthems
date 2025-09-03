@@ -53,7 +53,6 @@ resource "aws_cloudfront_distribution" "cdn" {
   enabled     = true
   default_root_object = "index.html"
   price_class = "PriceClass_100"
-    depends_on = [data.aws_s3_bucket_policy.frontend_policy]
 
   origin {
       domain_name              = data.aws_s3_bucket.frontend.bucket_regional_domain_name

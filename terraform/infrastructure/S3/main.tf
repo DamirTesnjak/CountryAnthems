@@ -38,23 +38,8 @@ resource "aws_s3_bucket_versioning" "this" {
   }
 }
 
-resource "aws_route_table" "this" {
-  vpc_id = var.vpc_id
-}
-
-# VPC Endpoint for S3 (Private Access)
-resource "aws_vpc_endpoint" "s3" {
-    vpc_id = var.vpc_id
-    service_name = data.aws_vpc_endpoint_service.s3.service_name
-    vpc_endpoint_type = "Gateway"
-
-    route_table_ids = [
-        aws_route_table.this.id
-    ]
-}
-
 # Allow CloudFront to access S3 bucket
-resource "aws_s3_bucket_policy" "cloud_front_bucket_access" {
+resource "aws_s3_bucket_policy" "lock_to_oac" {
   bucket = aws_s3_bucket.frontend.id
-  policy = data.aws_iam_policy_document.cloudfront_access.json
+  policy = data.aws_iam_policy_document.lock_to_oac.json
 }

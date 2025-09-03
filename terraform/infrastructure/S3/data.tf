@@ -2,29 +2,34 @@ data "aws_vpc_endpoint_service" "s3" {
   service = "s3"
 }
 
-data "aws_cloudfront_origin_access_control" "s3_oac" {
-  id = var.cf_id
-}
-data "aws_s3_bucket" "this" {
+data "aws_s3_bucket" "frontend" {
   bucket = "${var.name}-bucket"
 }
 
-data "aws_iam_policy_document" "cloudfront_access" {
+data "aws_cloudfront_distribution" "cdn" {
+  id = var.cf_id
+}
+
+data "aws_iam_policy_document" "lock_to_oac" {
   statement {
-    sid    = "AllowCloudFront"
+    sid    = "AllowCloudFrontSigV4Requests"
     effect = "Allow"
 
     principals {
-      type        = "AWS"
-      identifiers = [data.aws_cloudfront_origin_access_control.s3_oac.iam_arn]
+      type        = "service"
+      identifiers = ["cloudfront.amazonaws.com"]
     }
 
-    actions = [
-      "s3:GetObject"
-    ]
+    actions = ["s3:GetObject"]
 
     resources = [
-      "${data.aws_s3_bucket.this.arn}/*"
+      "${data.aws_s3_bucket.frontend.arn}/*"
     ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [data.aws_cloudfront_distribution.cdn.arn]
+    }
   }
 }
