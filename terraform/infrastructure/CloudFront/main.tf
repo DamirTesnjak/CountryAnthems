@@ -55,17 +55,17 @@ resource "aws_cloudfront_distribution" "cdn" {
   price_class = "PriceClass_100"
     depends_on = [data.aws_s3_bucket_policy.frontend_policy]
 
-  origins {
-      domain_name              = aws_s3_bucket.this.bucket_regional_domain_name
+  origin {
+      domain_name              = data.aws_s3_bucket.frontend.bucket_regional_domain_name
       origin_id                = "s3-origin-${var.name}"
       origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
     }
 
-  origins {
-    domain_name = aws_lb.this.dns_name
+  origin {
+    domain_name = aws_lb.api.dns_name
     origin_id   = "cluster-${var.name}"
 
-    vpc_origin_config = {
+    vpc_origin_config {
       vpc_origin_id = aws_cloudfront_vpc_origin.this.id
     }
   }

@@ -15,9 +15,9 @@ output vpc_name {
 output alb_subnets {
     description = "ALB subnets"
     value = [
-        aws_subnet.private_1_us_west_2a.id,
-        aws_subnet.private_3_us_west_2b.id,
-        aws_subnet.private_5_us_west_2c.id
+        aws_subnet.public_1_us_west_2a.id,
+        aws_subnet.public_3_us_west_2b.id,
+        aws_subnet.public_5_us_west_2c.id
     ]
 }
 
