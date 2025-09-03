@@ -1,7 +1,7 @@
 module "vpc" {
   source = "./VPC"
 
-  availability_zones = ["us-west-2a", "us-west-2b"]
+  availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
   db_port = var.db_port
   name = var.name
   ecs_port = var.ecs_port
@@ -43,4 +43,6 @@ module "cloud_front" {
   alb_port = var.alb_port
   name = var.name
   vpc_id = module.vpc.vpc_id
+  alb_subnets = module.vpc.alb_subnets
+  db_subnets = module.vpc.db_subnets
 }

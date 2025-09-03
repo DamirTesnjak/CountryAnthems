@@ -9,6 +9,16 @@ resource "aws_ssm_parameter" "password" {
   value = random_string.password.result
 }
 
+resource "aws_db_subnet_group" "vpc" {
+  name       = var.vpc_name
+  subnet_ids = var.db_subnets
+
+  tags = {
+    Name = var.vpc_name
+  }
+}
+
+
 resource "aws_db_instance" "this" {
   allocated_storage    = 1
   db_name              = "${var.name}-db"
@@ -19,7 +29,7 @@ resource "aws_db_instance" "this" {
   username             = "${data.aws_ssm_parameter.postgres_user}"
   password             = random_string.password.result
   parameter_group_name = "default.postgres17"
-  db_subnet_group_name  = var.vpc_name
+  db_subnet_group_name  = aws_db_subnet_group.vpc.name
   publicly_accessible = false
   skip_final_snapshot  = true
   vpc_security_group_ids = [

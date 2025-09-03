@@ -10,3 +10,7 @@ variable name {
 variable alb_port {
     type = number
 }
+
+variable alb_subnets {
+    type = list(string)
+}

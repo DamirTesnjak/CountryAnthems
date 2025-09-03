@@ -54,18 +54,8 @@ resource "aws_vpc_endpoint" "s3" {
     ]
 }
 
-resource "aws_iam_role" "ecs_s3_role_access" {
-  name = "ecs_s3_role_access"
-  assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
-}
-
-resource "aws_iam_role_policy" "ecs_s3_policy" {
-  role = aws_iam_role.ecs_s3_role_access.id
-  policy = data.aws_iam_policy_document.ecs_s3_policy.json
-}
-
-
-resource "aws_s3_bucket_policy" "ecs_s3_bucket_access" {
+# Allow CloudFront to access S3 bucket
+resource "aws_s3_bucket_policy" "cloud_front_bucket_access" {
   bucket = aws_s3_bucket.this.id
-  policy = data.aws_iam_policy_document.ecs_s3_cloud_front_merged_policy.json
+  policy = data.aws_iam_policy_document.cloudfront_access.json
 }

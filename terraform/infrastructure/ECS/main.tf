@@ -12,15 +12,28 @@ resource "aws_ecs_cluster" "this" {
   }
 }
 
+resource "aws_iam_role" "execution" {
+  assume_role_policy = data.aws_iam_policy_document.execution_assume_role.json
+  name               = "${local.fullname}-execution"
+}
+
+resource "aws_iam_role" "task" {
+  assume_role_policy = data.aws_iam_policy_document.task_assume_role.json
+  name               = "${var.name}-task"
+}
+
 resource "aws_ecs_task_definition" "this" {
-  family = "country_anthem_api_service"
+  execution_role_arn = aws_iam_role.execution.arn
+  family = "${var.name}_api_service"
+  task_role_arn = aws_iam_role.task.arn
+
   container_definitions = jsonencode([
     {
       image = "${data.aws_ecr_repository.this.repository_url}:${data.aws_ecr_image.this.image_tags[0]}"
       cpu = 0.5
       memory = 1024
       essential = true
-      name = "country_anthem_api_service"
+      name = "${var.name}_api_service"
       portMappins = [{ containerPort = 5001 }] #the app listens to a port inside container
 
       secrets = [
@@ -60,17 +73,17 @@ resource "aws_ecs_task_definition" "this" {
   ])
 }
 
-resource "aws_iam_role" "this" {
+resource "aws_iam_role" "service" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  name               = "country_anthem_api_service"
+  name               = "${var.name}_api_service"
 }
 
-resource "aws_iam_role_policy_attachment" "this" {
+resource "aws_iam_role_policy_attachment" "service" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-  role       = aws_iam_role.this.name
+  role       = aws_iam_role.service.name
 }
 
-resource "aws_lb_target_group" "this" {
+resource "aws_lb_target_group" "service" {
   name = "${var.name}-tg"
   deregistration_delay              = 60
   load_balancing_cross_zone_enabled = true
@@ -84,18 +97,18 @@ resource "aws_ecs_service" "this" {
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = 1
-  iam_role        = aws_iam_role.this.arn
-  depends_on = [aws_iam_role_policy_attachment.this]
+  iam_role        = aws_iam_role.service.arn
+  depends_on = [aws_iam_role_policy_attachment.service]
 
   capacity_provider_strategy {
     base              = 1
-    capacity_provider = "country-anthems-api-service-spot"
+    capacity_provider = "${var.name}-api-service-spot"
     weight            = 100
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.this.arn
-    container_name   = "country_anthem_api_service"
+    target_group_arn = aws_lb_target_group.service.arn
+    container_name   = "${var.name}_api_service"
     container_port   = var.port
   }
 }

@@ -4,13 +4,10 @@ resource "aws_lb" "this" {
   internal                   = true
   load_balancer_type         = "application"
   preserve_host_header       = false
-  subnets                    = var.subnets
+  subnets                    = var.alb_subnets
 
-  security_groups = concat(
-    [data.aws_security_group.security_group_alb.id],
-    var.security_groups,
-  )
-}
+  security_groups = [data.aws_security_group.security_group_alb.id]
+  }
 
 resource "aws_lb_listener" "app_listener" {
   load_balancer_arn = aws_lb.this.arn
@@ -18,8 +15,13 @@ resource "aws_lb_listener" "app_listener" {
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg.arn
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "404 Not Found"
+      status_code  = "404"
+    }
   }
 }
 
