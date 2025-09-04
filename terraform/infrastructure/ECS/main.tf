@@ -64,7 +64,7 @@ resource "aws_ecs_task_definition" "api_task" {
       memory      = 1024
       essential   = true
       name        = "${var.name}_api_service"
-      portMappins = [{ containerPort = 5001 }] #the app listens to a port inside container
+      portMappins = [{ containerPort = 5001 }]
 
       secrets = [
         {
@@ -121,7 +121,7 @@ resource "aws_lb_target_group" "service" {
 }
 
 resource "aws_ecs_service" "api" {
-  name            = "country-anthems-service"
+  name            = "${var.name}-service"
   cluster         = aws_ecs_cluster.api.id
   task_definition = aws_ecs_task_definition.api_task.arn
   desired_count   = 1

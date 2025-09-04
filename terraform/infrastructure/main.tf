@@ -22,6 +22,7 @@ module "s3" {
 
   vpc_id = module.vpc.vpc_id
   cf_id  = module.cloud_front.cf_id
+  ecs_service_url = module.cloud_front.ecs_service_url
 }
 
 module "ecr" {

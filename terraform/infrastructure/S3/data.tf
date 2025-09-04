@@ -33,3 +33,17 @@ data "aws_iam_policy_document" "lock_to_oac" {
     }
   }
 }
+
+data "template_file" "angular_config" {
+  template = file("${path.module}/config.tpl.json")
+  vars     = { api_url = var.ecs_service_url }
+}
+
+data "aws_ecs_cluster" "api" {
+  cluster_name =  "${var.name}-api"
+}
+
+data "aws_ecs_service" "api" {
+  service_name = "${var.name}-service"
+  cluster_arn  = data.aws_ecs_cluster.api.arn
+}

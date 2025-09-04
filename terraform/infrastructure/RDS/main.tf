@@ -49,3 +49,50 @@ PGPASSWORD=${random_string.password.result} psql \
 EOT
   }
 }
+
+resource "null_resource" "seed_db" {
+  depends_on = [null_resource.enable_postgis]
+
+  provisioner "local-exec" {
+    command = <<EOT
+PGPASSWORD="${random_string.password.result}" psql \
+  --host=${aws_db_instance.this.address} \
+  --port=5432 \
+  --username=${aws_db_instance.this.username} \
+  --dbname=${aws_db_instance.this.db_name} \
+  --file="${path.module}/migrations/init_shop.sql"
+EOT
+  }
+}
+
+resource "null_resource" "import_geojson" {
+  depends_on = [null_resource.seed_db]
+
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    command     = "${path.module}/migrations/import.sh"
+    env = {
+      POSTGRES_USER     = aws_db_instance.this.username
+      POSTGRES_PASSWORD = random_string.password.result
+      POSTGRES_DB       = aws_db_instance.this.db_name
+      PGHOST            = aws_db_instance.this.address
+      PGPORT            = 5432
+    }
+  }
+}
+
+resource "null_resource" "import_geojson" {
+  depends_on = [null_resource.import_geojson]
+
+  provisioner "local-exec" {
+    command = <<EOT
+    sed "s|__DATA_PATH__|${path.module}/migrations/countries_capitals_anthems.json|" ${path.module}/migrations/update.sql | \
+PGPASSWORD="${random_string.password.result}" psql \
+  --host=${aws_db_instance.this.address} \
+  --port=5432 \
+  --username=${aws_db_instance.this.username} \
+  --dbname=${aws_db_instance.this.db_name} \
+  --file="${path.module}/migrations/update.sql"
+EOT
+  }
+}

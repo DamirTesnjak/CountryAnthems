@@ -10,3 +10,7 @@ variable "vpc_id" {
 variable "cf_id" {
   type = string
 }
+
+variable "ecs_service_url" {
+  type = string
+}

@@ -43,3 +43,16 @@ resource "aws_s3_bucket_policy" "lock_to_oac" {
   bucket = aws_s3_bucket.frontend.id
   policy = data.aws_iam_policy_document.lock_to_oac.json
 }
+
+resource "local_file" "config_json" {
+  content  = data.template_file.angular_config.rendered
+  filename = "/frontend/dist/country-anthems/assets/config.json"
+}
+
+resource "null_resource" "upload_angular" {
+  provisioner "local-exec" {
+    command = "aws s3 sync frontend/dist/${var.name}/ s3://${aws_s3_bucket.frontend.bucket} --delete --recursive"
+  }
+
+  depends_on = [aws_s3_bucket.frontend]
+}
