@@ -18,7 +18,6 @@ resource "aws_db_subnet_group" "rds-subnets" {
   }
 }
 
-
 resource "aws_db_instance" "this" {
   allocated_storage                   = 1
   db_name                             = "${var.name}-db"
@@ -70,18 +69,18 @@ resource "null_resource" "import_geojson" {
 
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "${path.module}/migrations/import.sh"
-    env = {
-      POSTGRES_USER     = aws_db_instance.this.username
-      POSTGRES_PASSWORD = random_string.password.result
-      POSTGRES_DB       = aws_db_instance.this.db_name
-      PGHOST            = aws_db_instance.this.address
-      PGPORT            = 5432
-    }
+     command     = <<EOT
+      POSTGRES_USER=${aws_db_instance.this.username} \
+      POSTGRES_PASSWORD=${random_string.password.result} \
+      POSTGRES_DB=${aws_db_instance.this.db_name} \
+      PGHOST=${aws_db_instance.this.address} \
+      PGPORT=5432 \
+      ${path.module}/migrations/import.sh
+    EOT
   }
 }
 
-resource "null_resource" "import_geojson" {
+resource "null_resource" "populate_with_data" {
   depends_on = [null_resource.import_geojson]
 
   provisioner "local-exec" {
