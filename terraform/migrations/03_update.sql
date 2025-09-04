@@ -15,7 +15,7 @@ CREATE TABLE country_extra (
 
 CREATE TEMP TABLE capitals_raw(json_text text);
 
-\copy capitals_raw FROM '/docker-entrypoint-initdb.d/countries_capitals_anthems.json'
+\copy capitals_raw FROM '__DATA_PATH__'
 
 INSERT INTO country_extra(country_wiki_data, country_label, capital_wiki_data, capital_label, anthem, anthem_label, anthem_audio)
 SELECT
@@ -31,7 +31,6 @@ FROM (
     FROM capitals_raw
 ) t;
 
--- Corrected UPDATE statement
 UPDATE countries c
 SET 
     capital_city = e.capital_label,
