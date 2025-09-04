@@ -9,5 +9,5 @@ import { MapBox } from './components/map-box/map-box';
   styleUrl: './app.scss'
 })
 export class App {
-  protected title = 'storm-tracker';
+  protected title = 'country-anthems';
 }

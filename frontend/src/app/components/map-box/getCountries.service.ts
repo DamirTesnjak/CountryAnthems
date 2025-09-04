@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { IBodyRequest } from "./type";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
@@ -8,8 +8,8 @@ import { Observable } from "rxjs";
 })
 
 export class CountryService {
-    private baseUrl = "http://localhost:5001";
-    constructor(private http: HttpClient) { }
+    private http = inject(HttpClient);
+    private baseUrl = (window as any).__env.apiUrl as string;
 
     getCountry(bodyReq: IBodyRequest): Observable<any> {
         const url = `${this.baseUrl}/which-country?lat=${bodyReq.lat}&lng=${bodyReq.lng}`;

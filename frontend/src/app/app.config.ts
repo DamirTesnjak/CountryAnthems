@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, provideAppInitializer } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -13,5 +13,13 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
     ),
+    provideAppInitializer(() => {
+      return fetch('/assets/config.json')
+        .then(res => res.json())
+        .then(cfg => {
+          // stash on window for global access
+          (window as any).__env = cfg;
+        });
+    })
   ]
 };

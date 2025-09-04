@@ -1,6 +1,6 @@
 {
-  "name": "storm-tracker",
-  "version": "0.0.0",
+  "name": "country-anthems",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --poll=2000",
