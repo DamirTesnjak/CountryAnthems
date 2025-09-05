@@ -18,3 +18,7 @@ variable "alb_subnets" {
 variable "security_group_alb_id" {
   type = string
 }
+
+variable "bucket_regional_domain_name" {
+  type = string
+}

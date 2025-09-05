@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   price_class         = "PriceClass_100"
 
   origin {
-    domain_name              = data.aws_s3_bucket.frontend.bucket_regional_domain_name
+    domain_name              = var.bucket_regional_domain_name
     origin_id                = "s3-origin-${var.name}"
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
   }

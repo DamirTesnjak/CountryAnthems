@@ -1,14 +1,5 @@
 data "aws_region" "this" {}
 
-data "aws_ecr_repository" "this" {
-  name = var.ecr_repository_name
-}
-
-data "aws_ecr_image" "this" {
-  repository_name = var.ecr_repository_name
-  image_tag       = "latest"
-}
-
 data "aws_iam_policy_document" "assume_role" {
   statement {
     actions = ["sts:AssumeRole"]

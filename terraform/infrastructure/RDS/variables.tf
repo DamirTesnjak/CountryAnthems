@@ -16,3 +16,7 @@ variable "security_group_db_id" {
 variable "db_subnets" {
   type = list(string)
 }
+
+variable "postgres_user" {
+  type = string
+}

@@ -14,3 +14,7 @@ variable "cf_id" {
 variable "ecs_service_url" {
   type = string
 }
+
+variable "aws_ecs_cluster_api_arn" {
+  type = string
+}

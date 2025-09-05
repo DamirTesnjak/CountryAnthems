@@ -1,8 +1,3 @@
-variable "ecr_repository_name" {
-  type        = string
-  description = "ECR repository name"
-}
-
 variable "vpc_id" {
   description = "VPC id value"
   type        = string
@@ -25,5 +20,17 @@ variable "ecs_subnets" {
 }
 
 variable "security_group_ecs_id" {
+  type = string
+}
+
+variable "image_registry" {
+  type = string
+}
+
+variable "image_repository" {
+  type = string
+}
+
+variable "image_tag" {
   type = string
 }

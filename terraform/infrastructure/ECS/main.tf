@@ -59,7 +59,7 @@ resource "aws_ecs_task_definition" "api_task" {
 
   container_definitions = jsonencode([
     {
-      image       = "${data.aws_ecr_repository.this.repository_url}:${data.aws_ecr_image.this.image_tags[0]}"
+      image       = "${var.image_registry}/${var.image_repository}:${var.image_tag}"
       cpu         = 0.5
       memory      = 1024
       essential   = true
@@ -131,6 +131,7 @@ resource "aws_ecs_service" "api" {
   network_configuration {
     subnets         = var.ecs_subnets
     security_groups = [data.aws_security_group.security_group_ecs.id]
+    assign_public_ip = false
   }
 
   capacity_provider_strategy {

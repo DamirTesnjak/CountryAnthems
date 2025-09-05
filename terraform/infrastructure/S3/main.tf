@@ -46,7 +46,7 @@ resource "aws_s3_bucket_policy" "lock_to_oac" {
 
 resource "local_file" "config_json" {
   content  = data.template_file.angular_config.rendered
-  filename = "/frontend/dist/country-anthems/assets/config.json"
+  filename = "/frontend/dist/${var.name}/assets/config.json"
 }
 
 resource "null_resource" "upload_angular" {

@@ -15,6 +15,7 @@ module "rds" {
   name                 = var.name
   vpc_name             = module.vpc.vpc_name
   db_subnets           = module.vpc.db_subnets
+  postgres_user        = module.esc.postgres_user
 }
 
 module "s3" {
@@ -23,6 +24,7 @@ module "s3" {
   vpc_id = module.vpc.vpc_id
   cf_id  = module.cloud_front.cf_id
   ecs_service_url = module.cloud_front.ecs_service_url
+  aws_ecs_cluster_api_arn = module.ecs.aws_ecs_cluster_api_arn
 }
 
 module "ecr" {
@@ -32,7 +34,9 @@ module "ecr" {
 module "ecs" {
   source = "./ECS"
 
-  ecr_repository_name   = module.ecr.ecr_repository_name
+  image_registry    = "${data.aws_caller_identity.this.account_id}.dkr.ecr.${data.aws_region.this.region}.amazonaws.com"
+  image_repository  = module.ecr.ecr_repository_name
+  image_tag         = var.name
   bucket_domain_name    = module.s3.bucket_domain_name
   vpc_id                = module.vpc.vpc_id
   name                  = var.name
@@ -49,4 +53,5 @@ module "cloud_front" {
   vpc_id                = module.vpc.vpc_id
   alb_subnets           = module.vpc.alb_subnets
   security_group_alb_id = module.vpc.security_group_alb_id
+  bucket_regional_domain_name = module.s3.bucket_regional_domain_name
 }

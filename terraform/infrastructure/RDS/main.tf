@@ -25,7 +25,7 @@ resource "aws_db_instance" "this" {
   engine_version                      = "17.6"
   iam_database_authentication_enabled = false
   instance_class                      = "db.t4g.micro"
-  username                            = data.aws_ssm_parameter.postgres_user
+  username                            = var.postgres_user
   password                            = random_string.password.result
   parameter_group_name                = "default.postgres17"
   db_subnet_group_name                = aws_db_subnet_group.rds-subnets.name
