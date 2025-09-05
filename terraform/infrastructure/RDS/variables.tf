@@ -17,6 +17,6 @@ variable "db_subnets" {
   type = list(string)
 }
 
-variable "postgres_user" {
+variable "db_user" {
   type = string
 }

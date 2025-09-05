@@ -19,13 +19,13 @@ resource "aws_db_subnet_group" "rds-subnets" {
 }
 
 resource "aws_db_instance" "this" {
-  allocated_storage                   = 1
+  allocated_storage                   = 20
   db_name                             = "geo"
   engine                              = "postgres"
   engine_version                      = "17.6"
   iam_database_authentication_enabled = false
   instance_class                      = "db.t4g.micro"
-  username                            = var.postgres_user
+  username                            = var.db_user
   password                            = random_string.password.result
   parameter_group_name                = "default.postgres17"
   db_subnet_group_name                = aws_db_subnet_group.rds-subnets.name
@@ -39,11 +39,12 @@ resource "null_resource" "enable_postgis" {
 
   provisioner "local-exec" {
     command = <<EOT
-PGPASSWORD=${random_string.password.result} psql \
+psql \
   --host=${aws_db_instance.this.address} \
   --port=5432 \
   --username=${aws_db_instance.this.username} \
   --dbname=${aws_db_instance.this.db_name} \
+  --password=${random_string.password.result} \
   -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 EOT
   }
@@ -54,11 +55,12 @@ resource "null_resource" "seed_db" {
 
   provisioner "local-exec" {
     command = <<EOT
-PGPASSWORD="${random_string.password.result}" psql \
+psql \
   --host=${aws_db_instance.this.address} \
   --port=5432 \
   --username=${aws_db_instance.this.username} \
   --dbname=${aws_db_instance.this.db_name} \
+  --password=${random_string.password.result} \
   --file="${path.module}/migrations/init_shop.sql"
 EOT
   }
@@ -86,11 +88,12 @@ resource "null_resource" "populate_with_data" {
   provisioner "local-exec" {
     command = <<EOT
     sed "s|__DATA_PATH__|${path.module}/migrations/countries_capitals_anthems.json|" ${path.module}/migrations/update.sql | \
-PGPASSWORD="${random_string.password.result}" psql \
+psql \
   --host=${aws_db_instance.this.address} \
   --port=5432 \
   --username=${aws_db_instance.this.username} \
   --dbname=${aws_db_instance.this.db_name} \
+  --password=${random_string.password.result} \
   --file="${path.module}/migrations/update.sql"
 EOT
   }

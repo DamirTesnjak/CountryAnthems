@@ -8,7 +8,7 @@ data "aws_iam_policy_document" "lock_to_oac" {
     effect = "Allow"
 
     principals {
-      type        = "service"
+      type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
     }
 
