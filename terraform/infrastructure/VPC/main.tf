@@ -18,7 +18,7 @@ module "securityGroup" {
 
 resource "aws_subnet" "public_1_us_west_2a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.1.0.0/16"
+  cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
 
@@ -29,7 +29,7 @@ resource "aws_subnet" "public_1_us_west_2a" {
 
 resource "aws_subnet" "private_2_us_west_2a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.2.0.0/16"
+  cidr_block              = "10.0.2.0/24"
   availability_zone       = "us-west-2a"
   map_public_ip_on_launch = false
 
@@ -40,7 +40,7 @@ resource "aws_subnet" "private_2_us_west_2a" {
 
 resource "aws_subnet" "public_3_us_west_2b" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.3.0.0/16"
+  cidr_block              = "10.0.3.0/24"
   availability_zone       = "us-west-2b"
   map_public_ip_on_launch = true
 
@@ -51,7 +51,7 @@ resource "aws_subnet" "public_3_us_west_2b" {
 
 resource "aws_subnet" "private_4_us_west_2b" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.4.0.0/16"
+  cidr_block              = "10.0.4.0/24"
   availability_zone       = "us-west-2b"
   map_public_ip_on_launch = false
 
@@ -62,7 +62,7 @@ resource "aws_subnet" "private_4_us_west_2b" {
 
 resource "aws_subnet" "public_5_us_west_2c" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.5.0.0/16"
+  cidr_block              = "10.0.5.0/24"
   availability_zone       = "us-west-2c"
   map_public_ip_on_launch = true
 
@@ -73,7 +73,7 @@ resource "aws_subnet" "public_5_us_west_2c" {
 
 resource "aws_subnet" "private_6_us_west_2c" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.6.0.0/16"
+  cidr_block              = "10.0.6.0/24"
   availability_zone       = "us-west-2c"
   map_public_ip_on_launch = false
 
@@ -84,7 +84,7 @@ resource "aws_subnet" "private_6_us_west_2c" {
 
 resource "aws_subnet" "private_7_us_west_2a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.7.0.0/16"
+  cidr_block              = "10.0.7.0/24"
   availability_zone       = "us-west-2a"
   map_public_ip_on_launch = false
 
@@ -95,7 +95,7 @@ resource "aws_subnet" "private_7_us_west_2a" {
 
 resource "aws_subnet" "private_8_us_west_2b" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.8.0.0/16"
+  cidr_block              = "10.0.8.0/24"
   availability_zone       = "us-west-2b"
   map_public_ip_on_launch = false
 
@@ -106,7 +106,7 @@ resource "aws_subnet" "private_8_us_west_2b" {
 
 resource "aws_subnet" "private_9_us_west_2c" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.9.0.0/16"
+  cidr_block              = "10.0.9.0/24"
   availability_zone       = "us-west-2c"
   map_public_ip_on_launch = false
 

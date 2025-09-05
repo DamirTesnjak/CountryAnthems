@@ -20,7 +20,7 @@ resource "aws_db_subnet_group" "rds-subnets" {
 
 resource "aws_db_instance" "this" {
   allocated_storage                   = 1
-  db_name                             = "${var.name}-db"
+  db_name                             = "geo"
   engine                              = "postgres"
   engine_version                      = "17.6"
   iam_database_authentication_enabled = false

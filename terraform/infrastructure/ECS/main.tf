@@ -57,48 +57,54 @@ resource "aws_ecs_task_definition" "api_task" {
   family             = "${var.name}-task"
   task_role_arn      = aws_iam_role.task.arn
 
-  container_definitions = jsonencode([
+  container_definitions = <<TASK_DEFINITION
+  [
     {
-      image       = "${var.image_registry}/${var.image_repository}:${var.image_tag}"
-      cpu         = 0.5
-      memory      = 1024
-      essential   = true
-      name        = "${var.name}_api_service"
-      portMappins = [{ containerPort = 5001 }]
-
-      secrets = [
-        {
-          "name" : aws_ssm_parameter.postgres_user.name
-          "valueFrom" : aws_ssm_parameter.postgres_user.arn
-        },
-        {
-          "name" : aws_ssm_parameter.postgres_host.name
-          "valueFrom" : aws_ssm_parameter.postgres_host.arn
-        },
-        {
-          "name" : aws_ssm_parameter.postgres_db.name
-          "valueFrom" : aws_ssm_parameter.postgres_db.arn
-        },
-        {
-          "name" : aws_ssm_parameter.postgres_password.name
-          "valueFrom" : aws_ssm_parameter.postgres_password.arn
-        },
-        {
-          "name" : aws_ssm_parameter.origin.name
-          "valueFrom" : [aws_ssm_parameter.origin.value]
+      "image": "${var.image_registry}/${var.image_repository}:${var.image_tag}",
+      "cpu": 256,
+      "memory": 1024,
+      "essential": true,
+      "name": "${var.name}_api_service",
+      "portMappins": [
+        { 
+          "containerPort": 5001 
         }
-      ]
+      ],
 
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.this.name
-          "awslogs-region"        = data.aws_region.this.region
-          "awslogs-stream-prefix" = "api"
+      "secrets": [
+        {
+          "name": "${aws_ssm_parameter.postgres_user.name}",
+          "valueFrom": "${aws_ssm_parameter.postgres_user.arn}"
+        },
+        {
+          "name": "${aws_ssm_parameter.postgres_host.name}",
+          "valueFrom": "${aws_ssm_parameter.postgres_host.arn}"
+        },
+        {
+          "name": "${aws_ssm_parameter.postgres_db.name}",
+          "valueFrom": "${aws_ssm_parameter.postgres_db.arn}"
+        },
+        {
+          "name": "${aws_ssm_parameter.postgres_password.name}",
+          "valueFrom": "${aws_ssm_parameter.postgres_password.arn}"
+        },
+        {
+          "name": "${aws_ssm_parameter.origin.name}",
+          "valueFrom": "${aws_ssm_parameter.origin.arn}"
+        }
+      ],
+
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${aws_cloudwatch_log_group.this.name}",
+          "awslogs-region": "${data.aws_region.this.region}",
+          "awslogs-stream-prefix": "api"
         }
       }
     }
-  ])
+  ]
+  TASK_DEFINITION
 }
 
 resource "aws_iam_role" "service" {

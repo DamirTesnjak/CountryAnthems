@@ -15,7 +15,7 @@ data "aws_iam_policy_document" "lock_to_oac" {
     actions = ["s3:GetObject"]
 
     resources = [
-      "${data.aws_s3_bucket.frontend.arn}/*"
+      "${aws_s3_bucket.frontend.arn}/*"
     ]
 
     condition {
@@ -29,9 +29,4 @@ data "aws_iam_policy_document" "lock_to_oac" {
 data "template_file" "angular_config" {
   template = file("${path.module}/config.tpl.json")
   vars     = { api_url = var.ecs_service_url }
-}
-
-data "aws_ecs_service" "api" {
-  service_name = "${var.name}-service"
-  cluster_arn  = var.aws_ecs_cluster_api_arn
 }

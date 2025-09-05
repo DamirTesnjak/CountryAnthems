@@ -15,7 +15,7 @@ module "rds" {
   name                 = var.name
   vpc_name             = module.vpc.vpc_name
   db_subnets           = module.vpc.db_subnets
-  postgres_user        = module.esc.postgres_user
+  postgres_user        = module.ecs.postgres_user
 }
 
 module "s3" {
