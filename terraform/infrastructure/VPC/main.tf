@@ -11,6 +11,7 @@ module "securityGroup" {
   source = "./securityGroup"
 
   vpc_id   = aws_vpc.main.id
+  security_group_EC2_id = var.security_group_EC2_id
   db_port  = var.db_port
   ecs_port = var.ecs_port
   alb_port = var.alb_port

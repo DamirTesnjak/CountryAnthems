@@ -48,6 +48,5 @@ resource "aws_instance" "bastion" {
 
     vpc_security_group_ids = [
       aws_security_group.security_group_EC2.id,
-      module.security_group_private.security_group_id,
   ]
 }

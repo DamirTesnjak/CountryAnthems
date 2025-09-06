@@ -2,6 +2,7 @@ module "vpc" {
   source = "./VPC"
 
   availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  security_group_EC2_id = module.bastion.security_group_EC2_id
   db_port            = var.db_port
   name               = var.name
   ecs_port           = var.ecs_port
@@ -12,7 +13,7 @@ module "rds" {
   source = "./RDS"
 
   security_group_db_id = module.vpc.security_group_db_id
-  security_group_EC2_id = module.bastion.security_group_EC2_id
+  aws_instance_bastion_id = module.bastion.aws_instance_bastion_id
   name                 = var.name
   vpc_name             = module.vpc.vpc_name
   db_subnets           = module.vpc.db_subnets

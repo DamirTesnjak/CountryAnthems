@@ -81,13 +81,13 @@ resource "aws_vpc_security_group_egress_rule" "db_allow_private" {
 
 #------------------------------------------------------------------------------
 
-resource "aws_security_group" "security_group_db" {
-  name        = "Security_DB"
+resource "aws_security_group" "allow_ec2_to_rds" {
+  name        = "Security_EC2_RDS"
   description = "Security group for database"
   vpc_id      = var.vpc_id
 }
 
-# allowing connection to DB
+# allowing connection to DB from EC2
 resource "aws_vpc_security_group_ingress_rule" "allow_ec2_to_rds" {
   description                  = "Allow private to access db"
   from_port                    = var.db_port

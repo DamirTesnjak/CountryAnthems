@@ -14,3 +14,7 @@ variable "ecs_port" {
 variable "alb_port" {
   type = number
 }
+
+variable "security_group_EC2_id" {
+  type = string
+}
