@@ -38,15 +38,10 @@ resource "null_resource" "enable_postgis" {
   depends_on = [aws_db_instance.this]
 
   provisioner "local-exec" {
-    command = <<EOT
-psql \
-  --host=${aws_db_instance.this.address} \
-  --port=5432 \
-  --username=${aws_db_instance.this.username} \
-  --dbname=${aws_db_instance.this.db_name} \
-  --password=${random_string.password.result} \
-  -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-EOT
+  environment = {
+    PGPASSWORD = random_string.password.result
+  }
+    command = "psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\""
   }
 }
 

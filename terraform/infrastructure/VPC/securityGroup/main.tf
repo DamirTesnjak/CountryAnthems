@@ -77,3 +77,32 @@ resource "aws_vpc_security_group_egress_rule" "db_allow_private" {
   security_group_id            = aws_security_group.security_group_db.id
   to_port                      = var.db_port
 }
+
+
+#------------------------------------------------------------------------------
+
+resource "aws_security_group" "security_group_db" {
+  name        = "Security_DB"
+  description = "Security group for database"
+  vpc_id      = var.vpc_id
+}
+
+# allowing connection to DB
+resource "aws_vpc_security_group_ingress_rule" "allow_ec2_to_rds" {
+  description                  = "Allow private to access db"
+  from_port                    = var.db_port
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.security_group_EC2_id
+  security_group_id            = aws_security_group.security_group_db.id
+  to_port                      = var.db_port
+}
+
+# allowing output from DB
+resource "aws_vpc_security_group_egress_rule" "allow_ec2_to_rds" {
+  description                  = "Allow private from db"
+  from_port                    = var.db_port
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.security_group_EC2_id
+  security_group_id            = aws_security_group.security_group_db.id
+  to_port                      = var.db_port
+}

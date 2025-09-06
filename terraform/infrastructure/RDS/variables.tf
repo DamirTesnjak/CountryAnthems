@@ -13,6 +13,10 @@ variable "security_group_db_id" {
   type        = string
 }
 
+variable "security_group_EC2_id" {
+  type = string
+}
+
 variable "db_subnets" {
   type = list(string)
 }

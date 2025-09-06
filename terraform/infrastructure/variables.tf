@@ -13,3 +13,7 @@ variable "name" {
 variable "alb_port" {
   type = string
 }
+
+variable "bastion_ingress" {
+  type = string
+}
