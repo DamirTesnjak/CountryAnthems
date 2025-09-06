@@ -46,9 +46,15 @@ resource "null_resource" "enable_postgis" {
       PGHOST     = aws_db_instance.this.address
       PGUSER     = var.db_user
       PGDATABASE = aws_db_instance.this.db_name
+      PGPORT = 5432
     }
     command = <<EOT
-psql -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+psql \
+  -h "${PGHOST}" \
+  -U "${PGUSER}" \
+  -d "${PGDATABASE}" \
+  -P "${PGPORT}" \
+  -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 EOT
   }
 }
@@ -65,9 +71,15 @@ resource "null_resource" "seed_db" {
       PGHOST     = aws_db_instance.this.address
       PGUSER     = var.db_user
       PGDATABASE = aws_db_instance.this.db_name
+      PGPORT = 5432
     }
     command = <<EOT
-psql --file="${path.module}/migrations/init_shop.sql"
+psql \
+  -h "${PGHOST}" \
+  -U "${PGUSER}" \
+  -d "${PGDATABASE}" \
+  -P "${PGPORT}" \
+  --file="${path.module}/migrations/init_shop.sql"
 EOT
   }
 }
@@ -79,13 +91,20 @@ resource "null_resource" "import_geojson" {
   depends_on = [null_resource.seed_db]
 
   provisioner "local-exec" {
+    environment = {
+      PGPASSWORD = random_string.password.result
+      PGHOST     = aws_db_instance.this.address
+      PGUSER     = var.db_user
+      PGDATABASE = aws_db_instance.this.db_name
+      PGPORT = 5432
+    }
     interpreter = ["bash", "-c"]
     command     = <<EOT
-POSTGRES_USER=${aws_db_instance.this.username} \
-POSTGRES_PASSWORD=${random_string.password.result} \
-POSTGRES_DB=${aws_db_instance.this.db_name} \
-PGHOST=${aws_db_instance.this.address} \
-PGPORT=5432 \
+POSTGRES_USER=${PGUSER} \
+POSTGRES_PASSWORD=${PGPASSWORD} \
+POSTGRES_DB=${PGDATABASE} \
+PGHOST=${PGHOST} \
+PGPORT=${PGPORT} \
 ${path.module}/migrations/import.sh
 EOT
   }
@@ -94,20 +113,31 @@ EOT
 resource "null_resource" "populate_with_data" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
+    data_path  = "${path.module}/migrations/countries_capitals_anthems.json"
+    sql_file   = "${path.module}/migrations/update.sql"
   }
+
   depends_on = [null_resource.import_geojson]
 
   provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+
     environment = {
       PGPASSWORD = random_string.password.result
       PGHOST     = aws_db_instance.this.address
-      PGUSER     = aws_db_instance.this.username
+      PGUSER     = var.db_user
       PGDATABASE = aws_db_instance.this.db_name
       PGPORT     = "5432"
     }
+
     command = <<EOT
-sed "s|__DATA_PATH__|${path.module}/migrations/countries_capitals_anthems.json|g" ${path.module}/migrations/update.sql \
-  | psql
+sed "s|__DATA_PATH__|${path.module}/migrations/countries_capitals_anthems.json|g" \
+  "${path.module}/migrations/update.sql" \
+  | psql \
+      -h "${PGHOST}" \
+      -p "${PGPORT}" \
+      -U "${PGUSER}" \
+      -d "${PGDATABASE}"
 EOT
   }
 }
