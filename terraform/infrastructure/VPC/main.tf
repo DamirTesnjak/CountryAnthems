@@ -11,10 +11,11 @@ module "securityGroup" {
   source = "./securityGroup"
 
   vpc_id   = aws_vpc.main.id
-  security_group_EC2_id = var.security_group_EC2_id
+  security_group_bastion_id = var.security_group_bastion_id
   db_port  = var.db_port
   ecs_port = var.ecs_port
   alb_port = var.alb_port
+  bastion_ingress = var.bastion_ingress
 }
 
 resource "aws_subnet" "public_1_us_west_2a" {
@@ -126,3 +127,10 @@ resource "aws_subnet" "public_bastion" {
     Name = "public_bastion"
   }
 }
+
+# Associate subnet with public route table
+resource "aws_route_table_association" "public_bastion" {
+  subnet_id      = aws_subnet.public_bastion.id
+  route_table_id = var.aws_route_table_public_id
+}
+

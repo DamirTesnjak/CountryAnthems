@@ -2,11 +2,13 @@ module "vpc" {
   source = "./VPC"
 
   availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
-  security_group_EC2_id = module.bastion.security_group_EC2_id
+  security_group_bastion_id = module.bastion.security_group_bastion_id
   db_port            = var.db_port
   name               = var.name
   ecs_port           = var.ecs_port
   alb_port           = var.alb_port
+  bastion_ingress = var.bastion_ingress
+  aws_route_table_public_id = module.cloud_front.aws_route_table_public_id
 }
 
 module "rds" {

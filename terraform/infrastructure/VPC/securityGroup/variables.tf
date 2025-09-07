@@ -15,6 +15,10 @@ variable "alb_port" {
   type = number
 }
 
-variable "security_group_EC2_id" {
+variable "security_group_bastion_id" {
+  type = string
+}
+
+variable "bastion_ingress" {
   type = string
 }

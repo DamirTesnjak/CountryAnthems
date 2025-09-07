@@ -32,28 +32,22 @@ resource "aws_db_instance" "this" {
   publicly_accessible                 = false
   skip_final_snapshot                 = true
   vpc_security_group_ids              = [var.security_group_db_id]
+  port = 5432
 }
 
-resource "null_resource" "enable_postgis" {
+/*resource "null_resource" "enable_postgis" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
   }
   depends_on = [aws_db_instance.this]
 
   provisioner "local-exec" {
-    environment = {
-      PGPASSWORD = random_string.password.result
-      PGHOST     = aws_db_instance.this.address
-      PGUSER     = var.db_user
-      PGDATABASE = aws_db_instance.this.db_name
-      PGPORT = 5432
-    }
     command = <<EOT
 psql \
-  -h "${PGHOST}" \
-  -U "${PGUSER}" \
-  -d "${PGDATABASE}" \
-  -P "${PGPORT}" \
+  -h "${aws_db_instance.this.address}" \
+  -U "${var.db_user}" \
+  -d "${aws_db_instance.this.db_name}" \
+  -P "${aws_db_instance.this.port}" \
   -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 EOT
   }
@@ -66,19 +60,12 @@ resource "null_resource" "seed_db" {
   depends_on = [null_resource.enable_postgis]
 
   provisioner "local-exec" {
-    environment = {
-      PGPASSWORD = random_string.password.result
-      PGHOST     = aws_db_instance.this.address
-      PGUSER     = var.db_user
-      PGDATABASE = aws_db_instance.this.db_name
-      PGPORT = 5432
-    }
     command = <<EOT
 psql \
-  -h "${PGHOST}" \
-  -U "${PGUSER}" \
-  -d "${PGDATABASE}" \
-  -P "${PGPORT}" \
+  -h "${aws_db_instance.this.address}" \
+  -U "${var.db_user}" \
+  -d "${aws_db_instance.this.db_name}" \
+  -P "${aws_db_instance.this.port}" \
   --file="${path.module}/migrations/init_shop.sql"
 EOT
   }
@@ -91,20 +78,13 @@ resource "null_resource" "import_geojson" {
   depends_on = [null_resource.seed_db]
 
   provisioner "local-exec" {
-    environment = {
-      PGPASSWORD = random_string.password.result
-      PGHOST     = aws_db_instance.this.address
-      PGUSER     = var.db_user
-      PGDATABASE = aws_db_instance.this.db_name
-      PGPORT = 5432
-    }
     interpreter = ["bash", "-c"]
     command     = <<EOT
-POSTGRES_USER=${PGUSER} \
-POSTGRES_PASSWORD=${PGPASSWORD} \
-POSTGRES_DB=${PGDATABASE} \
-PGHOST=${PGHOST} \
-PGPORT=${PGPORT} \
+POSTGRES_USER=${var.db_user} \
+POSTGRES_PASSWORD=${random_string.password.result} \
+POSTGRES_DB=${aws_db_instance.this.db_name} \
+PGHOST=${aws_db_instance.this.address} \
+PGPORT=${aws_db_instance.this.port} \
 ${path.module}/migrations/import.sh
 EOT
   }
@@ -122,22 +102,14 @@ resource "null_resource" "populate_with_data" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
 
-    environment = {
-      PGPASSWORD = random_string.password.result
-      PGHOST     = aws_db_instance.this.address
-      PGUSER     = var.db_user
-      PGDATABASE = aws_db_instance.this.db_name
-      PGPORT     = "5432"
-    }
-
     command = <<EOT
 sed "s|__DATA_PATH__|${path.module}/migrations/countries_capitals_anthems.json|g" \
   "${path.module}/migrations/update.sql" \
   | psql \
-      -h "${PGHOST}" \
-      -p "${PGPORT}" \
-      -U "${PGUSER}" \
-      -d "${PGDATABASE}"
+  -h "${aws_db_instance.this.address}" \
+  -U "${var.db_user}" \
+  -d "${aws_db_instance.this.db_name}" \
+  -P "${aws_db_instance.this.port}" \
 EOT
   }
-}
+}*/

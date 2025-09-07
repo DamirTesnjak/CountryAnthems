@@ -49,10 +49,10 @@ resource "local_file" "config_json" {
   filename = "/frontend/dist/${var.name}/assets/config.json"
 }
 
-resource "null_resource" "upload_angular" {
+/* resource "null_resource" "upload_angular" {
   provisioner "local-exec" {
     command = "aws s3 sync \"C:/Users/Pifko/CountryAnthems/frontend/dist/${var.name}/\" s3://${aws_s3_bucket.frontend.bucket} --delete"
   }
 
   depends_on = [aws_s3_bucket.frontend]
-}
+} */

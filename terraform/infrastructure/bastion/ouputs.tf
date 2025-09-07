@@ -1,5 +1,5 @@
-output security_group_EC2_id {
-    value = aws_security_group.security_group_EC2.id
+output security_group_bastion_id {
+    value = aws_security_group.bastion_sg.id
 }
 
 output aws_instance_bastion_id {
