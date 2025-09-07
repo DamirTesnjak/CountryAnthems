@@ -22,3 +22,7 @@ variable "security_group_alb_id" {
 variable "bucket_regional_domain_name" {
   type = string
 }
+
+variable "aws_lb_target_group_service_arn" {
+  type = string
+}

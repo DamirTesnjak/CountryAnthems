@@ -128,9 +128,24 @@ resource "aws_subnet" "public_bastion" {
   }
 }
 
-# Associate subnet with public route table
+# Associate subnets with public route table
 resource "aws_route_table_association" "public_bastion" {
   subnet_id      = aws_subnet.public_bastion.id
+  route_table_id = var.aws_route_table_public_id
+}
+
+resource "aws_route_table_association" "public_1_us_west_2a" {
+  subnet_id      = aws_subnet.public_1_us_west_2a.id
+  route_table_id = var.aws_route_table_public_id
+}
+
+resource "aws_route_table_association" "public_3_us_west_2b" {
+  subnet_id      = aws_subnet.public_3_us_west_2b.id
+  route_table_id = var.aws_route_table_public_id
+}
+
+resource "aws_route_table_association" "public_5_us_west_2c" {
+  subnet_id      = aws_subnet.public_5_us_west_2c.id
   route_table_id = var.aws_route_table_public_id
 }
 

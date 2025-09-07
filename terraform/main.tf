@@ -8,6 +8,6 @@ module "infrastructure" {
   name     = "country-anthems"
   bastion_ingress = local.bastion_ingress
   db_port  = 5432
-  ecs_port = 8080
+  ecs_port = 5001
   alb_port = 80
 }

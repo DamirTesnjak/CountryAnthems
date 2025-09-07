@@ -56,6 +56,9 @@ resource "aws_ecs_task_definition" "api_task" {
   execution_role_arn = aws_iam_role.execution.arn
   family             = "${var.name}-task"
   task_role_arn      = aws_iam_role.task.arn
+  network_mode = "awsvpc"
+  requires_compatibilities = ["EC2"]
+
 
   container_definitions = <<TASK_DEFINITION
   [
@@ -65,9 +68,9 @@ resource "aws_ecs_task_definition" "api_task" {
       "memory": 1024,
       "essential": true,
       "name": "${var.name}_api_service",
-      "portMappins": [
+      "portMappings": [
         { 
-          "containerPort": 5001 
+          "containerPort": ${var.port} 
         }
       ],
 
@@ -124,6 +127,7 @@ resource "aws_lb_target_group" "service" {
   port                              = var.port
   protocol                          = "HTTP"
   vpc_id                            = var.vpc_id
+  target_type = "ip"
 }
 
 resource "aws_ecs_service" "api" {
@@ -131,19 +135,12 @@ resource "aws_ecs_service" "api" {
   cluster         = aws_ecs_cluster.api.id
   task_definition = aws_ecs_task_definition.api_task.arn
   desired_count   = 1
-  iam_role        = aws_iam_role.service.arn
   depends_on      = [aws_iam_role_policy_attachment.service]
 
   network_configuration {
     subnets         = var.ecs_subnets
     security_groups = [data.aws_security_group.security_group_ecs.id]
     assign_public_ip = false
-  }
-
-  capacity_provider_strategy {
-    base              = 1
-    capacity_provider = "${var.name}-api-service-spot"
-    weight            = 100
   }
 
   load_balancer {

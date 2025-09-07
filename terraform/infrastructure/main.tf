@@ -58,6 +58,7 @@ module "cloud_front" {
   alb_subnets           = module.vpc.alb_subnets
   security_group_alb_id = module.vpc.security_group_alb_id
   bucket_regional_domain_name = module.s3.bucket_regional_domain_name
+  aws_lb_target_group_service_arn = module.ecs.aws_lb_target_group_service_arn
 }
 
 module "bastion" {

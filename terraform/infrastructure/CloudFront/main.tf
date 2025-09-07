@@ -32,13 +32,8 @@ resource "aws_lb_listener" "app_listener" {
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "404 Not Found"
-      status_code  = "404"
-    }
+    type = "forward"
+    target_group_arn = var.aws_lb_target_group_service_arn
   }
 }
 
