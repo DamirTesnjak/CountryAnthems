@@ -35,24 +35,29 @@ resource "aws_db_instance" "this" {
   port = 5432
 }
 
-/*resource "null_resource" "enable_postgis" {
+resource "null_resource" "enable_postgis" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
   }
   depends_on = [aws_db_instance.this]
 
+  
+  connection {
+    type        = "ssh"
+    host        = var.bastion_public_ip
+    user        = "ubuntu"
+    private_key = var.bastion-private-key
+  }
+
   provisioner "local-exec" {
-    command = <<EOT
-psql \
-  -h "${aws_db_instance.this.address}" \
-  -U "${var.db_user}" \
-  -d "${aws_db_instance.this.db_name}" \
-  -P "${aws_db_instance.this.port}" \
-  -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-EOT
+
+    inline = [
+      "PGPASSWORD='${var.db_password}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\""
+    ]
   }
 }
 
+/*
 resource "null_resource" "seed_db" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
@@ -112,4 +117,4 @@ sed "s|__DATA_PATH__|${path.module}/migrations/countries_capitals_anthems.json|g
   -P "${aws_db_instance.this.port}" \
 EOT
   }
-}*/
+} */

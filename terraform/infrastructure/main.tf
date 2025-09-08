@@ -20,6 +20,8 @@ module "rds" {
   vpc_name             = module.vpc.vpc_name
   db_subnets           = module.vpc.db_subnets
   db_user        = module.ecs.db_user
+  bastion_public_ip = module.bastion.bastion_public_ip
+  bastion-private-key = module.bastion.bastion-private-key
 }
 
 module "s3" {

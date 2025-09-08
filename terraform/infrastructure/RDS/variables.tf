@@ -24,3 +24,11 @@ variable "db_subnets" {
 variable "db_user" {
   type = string
 }
+
+variable "bastion_public_ip" {
+  type = string
+}
+
+variable "bastion-private-key" {
+  type = string
+}
