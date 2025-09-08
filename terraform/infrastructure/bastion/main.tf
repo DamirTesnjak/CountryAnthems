@@ -20,6 +20,11 @@ resource "aws_security_group" "bastion_sg" {
   vpc_id      = var.vpc_id
 }
 
+resource "local_file" "my-keys" {
+  content = tls_private_key.bastion.private_key_pem
+  filename = "${var.name}-bastion.pem"
+}
+
 # allowing connection to EC2
 resource "aws_vpc_security_group_ingress_rule" "bastion_sg" {
   description       = "Allow connection from outside internet to access bastion"

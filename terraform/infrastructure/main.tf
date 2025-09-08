@@ -21,7 +21,7 @@ module "rds" {
   db_subnets           = module.vpc.db_subnets
   db_user        = module.ecs.db_user
   bastion_public_ip = module.bastion.bastion_public_ip
-  bastion-private-key = module.bastion.bastion-private-key
+  bastion_private_key = module.bastion.bastion_private_key
 }
 
 module "s3" {

@@ -41,38 +41,45 @@ resource "null_resource" "enable_postgis" {
   }
   depends_on = [aws_db_instance.this]
 
-  
   connection {
     type        = "ssh"
     host        = var.bastion_public_ip
     user        = "ubuntu"
-    private_key = var.bastion-private-key
+    private_key = var.bastion_private_key
   }
 
-  provisioner "local-exec" {
+  provisioner "remote-exec" {
 
     inline = [
-      "PGPASSWORD='${var.db_password}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\""
+       "sudo apt-get update",
+       "sudo apt-get install -y postgresql-client",
+      "PGPASSWORD='${random_string.password.result}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\""
     ]
   }
 }
 
-/*
 resource "null_resource" "seed_db" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
   }
   depends_on = [null_resource.enable_postgis]
 
-  provisioner "local-exec" {
-    command = <<EOT
-psql \
-  -h "${aws_db_instance.this.address}" \
-  -U "${var.db_user}" \
-  -d "${aws_db_instance.this.db_name}" \
-  -P "${aws_db_instance.this.port}" \
-  --file="${path.module}/migrations/init_shop.sql"
-EOT
+  connection {
+    type        = "ssh"
+    host        = var.bastion_public_ip
+    user        = "ubuntu"
+    private_key = var.bastion_private_key
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/migrations/01_init.sql"
+    destination = "/tmp/init.sql"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "PGPASSWORD='${random_string.password.result}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} --file=/tmp/init.sql"
+    ]
   }
 }
 
@@ -82,16 +89,39 @@ resource "null_resource" "import_geojson" {
   }
   depends_on = [null_resource.seed_db]
 
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    command     = <<EOT
-POSTGRES_USER=${var.db_user} \
-POSTGRES_PASSWORD=${random_string.password.result} \
-POSTGRES_DB=${aws_db_instance.this.db_name} \
-PGHOST=${aws_db_instance.this.address} \
-PGPORT=${aws_db_instance.this.port} \
-${path.module}/migrations/import.sh
-EOT
+  connection {
+    type        = "ssh"
+    host        = var.bastion_public_ip
+    user        = "ubuntu"
+    private_key = var.bastion_private_key
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/migrations/02_import.sh"
+    destination = "/tmp/import.sh"
+  }
+
+   provisioner "file" {
+    source      = "${path.module}/migrations/countries.geojson"
+    destination = "/tmp/countries.geojson"
+  }
+
+
+  provisioner "remote-exec" {
+    inline = [
+      "sed -i 's/\r$//' /tmp/import.sh",
+      "sudo apt-get update",
+      "sudo apt-get install gdal-bin",
+      "sudo apt install dos2unix",
+      "dos2unix /tmp/import.sh",
+      "chmod +x /tmp/import.sh",
+      "echo 'export PGHOST=${aws_db_instance.this.address}' >> ~/.bashrc",
+      "echo 'export PGPORT=${aws_db_instance.this.port}' >> ~/.bashrc",
+      "echo 'export POSTGRES_USER=${var.db_user}' >> ~/.bashrc",
+      "echo 'export POSTGRES_PASSWORD=${random_string.password.result}' >> ~/.bashrc",
+      "echo 'export POSTGRES_DB=${aws_db_instance.this.db_name}' >> ~/.bashrc",
+      "/tmp/import.sh"
+    ]
   }
 }
 
@@ -104,17 +134,27 @@ resource "null_resource" "populate_with_data" {
 
   depends_on = [null_resource.import_geojson]
 
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-
-    command = <<EOT
-sed "s|__DATA_PATH__|${path.module}/migrations/countries_capitals_anthems.json|g" \
-  "${path.module}/migrations/update.sql" \
-  | psql \
-  -h "${aws_db_instance.this.address}" \
-  -U "${var.db_user}" \
-  -d "${aws_db_instance.this.db_name}" \
-  -P "${aws_db_instance.this.port}" \
-EOT
+  connection {
+    type        = "ssh"
+    host        = var.bastion_public_ip
+    user        = "ubuntu"
+    private_key = var.bastion_private_key
   }
-} */
+
+  provisioner "file" {
+    source      = "${path.module}/migrations/countries_capitals_anthems.json"
+    destination = "/tmp/countries_capitals_anthems.json"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/migrations/03_update.sql"
+    destination = "/tmp/update.sql"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sed \"s|__DATA_PATH__|/tmp/countries_capitals_anthems.json|g\" /tmp/update.sql > /tmp/update_parsed.sql",
+      "PGPASSWORD='${random_string.password.result}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -f /tmp/update.sql"
+    ]
+  }
+}

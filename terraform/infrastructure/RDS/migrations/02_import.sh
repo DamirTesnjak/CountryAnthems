@@ -4,12 +4,7 @@ set -e
 echo "Running import.sh..."
 
 # Wait for Postgres to be ready
-until pg_isready \
-  --host="$PGHOST" \
-  --port="$PGPORT" \
-  --username="$POSTGRES_USER" \
-  --dbname="$POSTGRES_DB"
-do
+until pg_isready --host="$PGHOST" --port="$PGPORT" --username="$POSTGRES_USER" --dbname="$POSTGRES_DB"; do
   echo "Waiting for database..."
   sleep 2
 done
@@ -17,12 +12,8 @@ done
 # Import GeoJSON using ogr2ogr
 ogr2ogr \
   -f PostgreSQL \
-  PG:"dbname=$POSTGRES_DB \
-      user=$POSTGRES_USER \
-      password=$POSTGRES_PASSWORD \
-      host=$PGHOST \
-      port=$PGPORT" \
-  "${path.module}/migrations/countries.geojson" \
+  PG:"dbname=$POSTGRES_DB user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$PGHOST port=$PGPORT" \
+  "/tmp/countries.geojson" \
   -nln countries \
   -nlt GEOMETRY \
   -dialect SQLITE \

@@ -29,6 +29,6 @@ variable "bastion_public_ip" {
   type = string
 }
 
-variable "bastion-private-key" {
+variable "bastion_private_key" {
   type = string
 }
