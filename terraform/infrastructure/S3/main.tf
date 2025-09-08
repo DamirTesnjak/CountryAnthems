@@ -49,10 +49,11 @@ resource "local_file" "config_json" {
   filename = "/frontend/dist/${var.name}/assets/config.json"
 }
 
-/* resource "null_resource" "upload_angular" {
-  provisioner "local-exec" {
-    command = "aws s3 sync \"C:/Users/Pifko/CountryAnthems/frontend/dist/${var.name}/\" s3://${aws_s3_bucket.frontend.bucket} --delete"
-  }
+resource "aws_s3_object" "angular_assets" {
+  for_each = { for file in local.files : file => file }
 
-  depends_on = [aws_s3_bucket.frontend]
-} */
+  bucket = aws_s3_bucket.frontend.bucket
+  key    = each.key
+  source = "${path.module}/../frontend/dist/${var.name}/${each.key}"
+  etag   = filemd5("${path.module}/../frontend/dist/${var.name}/${each.key}")
+}

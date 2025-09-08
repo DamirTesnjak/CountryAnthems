@@ -35,7 +35,7 @@ resource "aws_db_instance" "this" {
   port = 5432
 }
 
-resource "null_resource" "enable_postgis" {
+ resource "null_resource" "enable_postgis" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
   }
@@ -59,9 +59,12 @@ resource "null_resource" "enable_postgis" {
 }
 
 resource "null_resource" "seed_db" {
+  lifecycle {
+    prevent_destroy = true
+  }
+
   triggers = {
     bastion_id = var.aws_instance_bastion_id
-    timestamp  = timestamp() # forces re-run on every apply
   }
   depends_on = [null_resource.enable_postgis]
 
