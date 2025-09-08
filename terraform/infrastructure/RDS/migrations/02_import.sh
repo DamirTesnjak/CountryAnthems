@@ -1,15 +1,34 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+exec > /tmp/import.log 2>&1
 
-echo "Running import.sh..."
+echo "Starting import.sh at $(date)"
 
-# Wait for Postgres to be ready
-until pg_isready --host="$PGHOST" --port="$PGPORT" --username="$POSTGRES_USER" --dbname="$POSTGRES_DB"; do
-  echo "Waiting for database..."
-  sleep 2
+# Validate required env vars
+for var in PGHOST PGPORT POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB; do
+  if [ -z "${!var:-}" ]; then
+    echo "Error: $var is not set"
+    exit 1
+  fi
 done
 
-# Import GeoJSON using ogr2ogr
+echo "Connecting to DB at $PGHOST:$PGPORT..."
+
+# Wait for Postgres to be ready
+MAX_RETRIES=30
+COUNT=0
+until pg_isready --host="$PGHOST" --port="$PGPORT" --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" > /dev/null 2>&1; do
+  echo "Waiting for database... attempt $COUNT"
+  sleep 2
+  COUNT=$((COUNT+1))
+  if [ "$COUNT" -ge "$MAX_RETRIES" ]; then
+    echo "Database did not become ready in time."
+    exit 1
+  fi
+done
+
+echo "Database is ready. Starting GeoJSON import..."
+
 ogr2ogr \
   -f PostgreSQL \
   PG:"dbname=$POSTGRES_DB user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$PGHOST port=$PGPORT" \

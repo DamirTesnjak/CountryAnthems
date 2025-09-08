@@ -61,6 +61,7 @@ resource "null_resource" "enable_postgis" {
 resource "null_resource" "seed_db" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
+    timestamp  = timestamp() # forces re-run on every apply
   }
   depends_on = [null_resource.enable_postgis]
 
@@ -111,15 +112,14 @@ resource "null_resource" "import_geojson" {
     inline = [
       "sed -i 's/\r$//' /tmp/import.sh",
       "sudo apt-get update",
-      "sudo apt-get install gdal-bin",
-      "sudo apt install dos2unix",
+      "sudo apt-get install -y gdal-bin dos2unix",
       "dos2unix /tmp/import.sh",
       "chmod +x /tmp/import.sh",
-      "echo 'export PGHOST=${aws_db_instance.this.address}' >> ~/.bashrc",
-      "echo 'export PGPORT=${aws_db_instance.this.port}' >> ~/.bashrc",
-      "echo 'export POSTGRES_USER=${var.db_user}' >> ~/.bashrc",
-      "echo 'export POSTGRES_PASSWORD=${random_string.password.result}' >> ~/.bashrc",
-      "echo 'export POSTGRES_DB=${aws_db_instance.this.db_name}' >> ~/.bashrc",
+      "export PGHOST=${aws_db_instance.this.address}",
+      "export PGPORT=${aws_db_instance.this.port}",
+      "export POSTGRES_USER=${var.db_user}",
+      "export POSTGRES_PASSWORD=${random_string.password.result}",
+      "export POSTGRES_DB=${aws_db_instance.this.db_name}",
       "/tmp/import.sh"
     ]
   }
