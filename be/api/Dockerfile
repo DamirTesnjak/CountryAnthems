@@ -1,9 +1,9 @@
-FROM node:20-alpine AS build
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY be/api/package.json ./package.json
-COPY be/api/server.js ./server.js
+COPY ./package.json ./package.json
+COPY ./server.js ./server.js
 RUN npm install
 
 EXPOSE 5001
