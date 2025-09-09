@@ -49,9 +49,24 @@ resource "local_file" "config_json" {
   filename = "${path.module}/../../../frontend/src/app/config.json"
 }
 
+resource "null_resource" "build_angular_app" {
+  depends_on = [
+    aws_s3_bucket.frontend.bucket,
+    local_file.config_json
+  ]
+
+  provisioner "local-exec" {
+    command = <<EOT
+    cd ${path.module}/../../../frontend \
+    npm run build
+    EOT
+  }
+}
+
 resource "null_resource" "deploy_to_s3" {
   depends_on = [
     aws_s3_bucket.frontend.bucket,
+    null_resource.build_angular_app,
     local_file.config_json
   ]
 
