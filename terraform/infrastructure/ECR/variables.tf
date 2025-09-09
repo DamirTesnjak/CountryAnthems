@@ -3,3 +3,7 @@ variable "ecr_repository_api_name" {
   default     = "country-anthems-api"
   type        = string
 }
+
+variable "image_tag" {
+  type = string
+}

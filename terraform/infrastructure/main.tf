@@ -35,6 +35,8 @@ module "s3" {
 
 module "ecr" {
   source = "./ECR"
+
+  image_tag         = var.name
 }
 
 module "ecs" {

@@ -11,7 +11,7 @@ import { ConfigService } from "../../config.service";
 export class CountryService {
     private http = inject(HttpClient);
     private configService = inject(ConfigService)
-    private baseUrl = this.configService.get("api_url");
+    private baseUrl = this.configService.get("apiUrl");
 
     getCountry(bodyReq: IBodyRequest): Observable<any> {
         const url = `${this.baseUrl}/which-country?lat=${bodyReq.lat}&lng=${bodyReq.lng}`;

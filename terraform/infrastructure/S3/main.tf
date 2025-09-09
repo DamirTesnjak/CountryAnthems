@@ -51,26 +51,25 @@ resource "local_file" "config_json" {
 
 resource "null_resource" "build_angular_app" {
   depends_on = [
-    aws_s3_bucket.frontend.bucket,
+    aws_s3_bucket.frontend,
     local_file.config_json
   ]
 
   provisioner "local-exec" {
-    command = <<EOT
-    cd ${path.module}/../../../frontend \
-    npm run build
-    EOT
+    working_dir = "${path.module}/../../../frontend"
+    command = "npm run build"
   }
 }
 
 resource "null_resource" "deploy_to_s3" {
   depends_on = [
-    aws_s3_bucket.frontend.bucket,
+    aws_s3_bucket.frontend,
     null_resource.build_angular_app,
     local_file.config_json
   ]
 
   provisioner "local-exec" {
-    command = "aws s3 sync \"${path.module}/../../../frontend/dist/${var.name}/\" s3://${aws_s3_bucket.frontend.bucket} --delete"
+    working_dir = "${path.module}/../../../frontend/dist/country-anthems"
+    command = "aws s3 sync . s3://${aws_s3_bucket.frontend.bucket} --delete"
   }
 }
