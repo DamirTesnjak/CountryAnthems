@@ -17,3 +17,7 @@ variable "alb_port" {
 variable "bastion_ingress" {
   type = string
 }
+
+variable "env_name" {
+  type = string
+}

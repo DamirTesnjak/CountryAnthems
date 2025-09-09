@@ -1,9 +1,7 @@
-variable "ecr_repository_api_name" {
-  description = "The ECR repository API name"
-  default     = "country-anthems-api"
-  type        = string
+variable "image_tag" {
+  type = string
 }
 
-variable "image_tag" {
+variable "name" {
   type = string
 }
