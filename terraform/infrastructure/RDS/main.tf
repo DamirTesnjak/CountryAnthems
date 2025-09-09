@@ -59,10 +59,6 @@ resource "aws_db_instance" "this" {
 }
 
 resource "null_resource" "seed_db" {
-  lifecycle {
-    prevent_destroy = true
-  }
-
   triggers = {
     bastion_id = var.aws_instance_bastion_id
   }

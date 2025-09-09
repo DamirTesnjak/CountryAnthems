@@ -46,18 +46,16 @@ resource "aws_s3_bucket_policy" "lock_to_oac" {
 
 resource "local_file" "config_json" {
   content  = data.template_file.angular_config.rendered
-  filename = "/frontend/dist/${var.name}/assets/config.json"
+  filename = "${path.module}/../../../frontend/src/app/config.json"
 }
 
-resource "null_resource" "upload_angular" {
+resource "null_resource" "deploy_to_s3" {
+  depends_on = [
+    aws_s3_bucket.frontend.bucket,
+    local_file.config_json
+  ]
+
   provisioner "local-exec" {
-    command = "aws s3 sync \"${abspath("${path.module}/../../../frontend/dist/${var.name}")}\" s3://${aws_s3_bucket.frontend.bucket} --delete"
+    command = "aws s3 sync \"${path.module}/../../../frontend/dist/${var.name}/\" s3://${aws_s3_bucket.frontend.bucket} --delete"
   }
-
-  triggers = {
-    build_hash = sha1(join("", fileset("${path.module}/../frontend/dist/${var.name}", "**")))
-  }
-
-  depends_on = [aws_s3_bucket.frontend]
-
 }

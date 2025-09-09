@@ -1,9 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, provideAppInitializer } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { ConfigService } from './config.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,12 +15,8 @@ export const appConfig: ApplicationConfig = {
       withFetch(),
     ),
     provideAppInitializer(() => {
-      return fetch('/assets/config.json')
-        .then(res => res.json())
-        .then(cfg => {
-          // stash on window for global access
-          (window as any).__env = cfg;
-        });
-    })
+      const config = inject(ConfigService);
+      return config.loadConfig();
+    }),
   ]
 };
