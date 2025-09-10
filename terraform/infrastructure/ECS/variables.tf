@@ -34,3 +34,19 @@ variable "image_repository" {
 variable "image_tag" {
   type = string
 }
+
+variable "pg_host" {
+  type = string
+}
+
+variable "pg_password" {
+  type = string
+}
+
+variable "pg_db" {
+  type = string
+}
+
+variable "cloudfront_domain" {
+  type = string
+}

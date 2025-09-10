@@ -10,7 +10,6 @@ resource "null_resource" "push_to_ecr" {
 
   triggers = {
     image_tag  = var.image_tag
-    always_run = timestamp()
   }
 
   provisioner "local-exec" {

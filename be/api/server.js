@@ -5,6 +5,8 @@ import cors from "cors";
 const { Pool } = pkg;
 
 const app = express();
+const api = express.Router();
+
 const pool = new Pool({
   user: process.env.POSTGRES_USER,
   host: process.env.POSTGRES_HOST,
@@ -21,6 +23,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Accept"],
   })
 );
+
+app.use("/api", api);
 
 app.get("/which-country", async (req, res) => {
   let { lat, lng } = req.query;

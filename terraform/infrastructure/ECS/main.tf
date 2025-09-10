@@ -31,25 +31,25 @@ resource "aws_ssm_parameter" "postgres_user" {
 resource "aws_ssm_parameter" "postgres_host" {
   name  = "POSTGRES_HOST"
   type  = "SecureString"
-  value = "value"
+  value = var.pg_host
 }
 
 resource "aws_ssm_parameter" "postgres_db" {
   name  = "POSTGRES_DB"
   type  = "SecureString"
-  value = "value"
+  value = var.pg_db
 }
 
 resource "aws_ssm_parameter" "postgres_password" {
   name  = "POSTGRES_PASSWORD"
   type  = "SecureString"
-  value = "value"
+  value = var.pg_password
 }
 
 resource "aws_ssm_parameter" "origin" {
   name  = "ORIGIN"
   type  = "SecureString"
-  value = "value"
+  value = var.cloudfront_domain
 }
 
 resource "aws_ecs_task_definition" "api_task" {

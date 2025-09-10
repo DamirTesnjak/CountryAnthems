@@ -11,3 +11,7 @@ output "ecs_service_url" {
 output "aws_route_table_public_id" {
   value = aws_route_table.public.id
 }
+
+output "cloudfront_domain" {
+  value = aws_cloudfront_distribution.cdn.domain_name
+}

@@ -69,7 +69,7 @@ resource "null_resource" "deploy_to_s3" {
   ]
 
   provisioner "local-exec" {
-    working_dir = "${path.module}/../../../frontend/dist/country-anthems"
+    working_dir = "${path.module}/../../../frontend/dist/country-anthems/browser"
     command = "aws s3 sync . s3://${aws_s3_bucket.frontend.bucket} --delete"
   }
 }

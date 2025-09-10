@@ -14,12 +14,12 @@ export class CountryService {
     private baseUrl = this.configService.get("apiUrl");
 
     getCountry(bodyReq: IBodyRequest): Observable<any> {
-        const url = `${this.baseUrl}/which-country?lat=${bodyReq.lat}&lng=${bodyReq.lng}`;
+        const url = `${this.baseUrl}/api/which-country?lat=${bodyReq.lat}&lng=${bodyReq.lng}`;
         return this.http.get(url);
     }
 
     getCountryToGuess(): Observable<any> {
-        const url = `${this.baseUrl}/random-country`;
+        const url = `${this.baseUrl}/api/random-country`;
         return this.http.get(url);
     }
 }

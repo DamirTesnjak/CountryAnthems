@@ -52,6 +52,10 @@ module "ecs" {
   port                  = var.ecs_port
   ecs_subnets           = module.vpc.ecs_subnets
   security_group_ecs_id = module.vpc.security_group_ecs_id
+  pg_host = module.rds.pg_host
+  pg_password = module.rds.pg_password
+  pg_db = module.rds.pg_db
+  cloudfront_domain = module.cloud_front.cloudfront_domain
 }
 
 module "cloud_front" {
