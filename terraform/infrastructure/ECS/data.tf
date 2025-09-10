@@ -1,11 +1,11 @@
 data "aws_region" "this" {}
 
-data "aws_iam_policy_document" "assume_role" {
+data "aws_iam_policy_document" "execution_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
 
     principals {
-      identifiers = ["ec2.amazonaws.com"]
+      identifiers = ["ecs-tasks.amazonaws.com"]
       type        = "Service"
     }
   }
@@ -22,12 +22,13 @@ data "aws_iam_policy_document" "task_assume_role" {
   }
 }
 
-data "aws_iam_policy_document" "execution_assume_role" {
+
+data "aws_iam_policy_document" "service_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
 
     principals {
-      identifiers = ["ecs-tasks.amazonaws.com"]
+      identifiers = ["ecs.amazonaws.com"]
       type        = "Service"
     }
   }

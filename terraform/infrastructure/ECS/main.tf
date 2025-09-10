@@ -111,8 +111,8 @@ resource "aws_ecs_task_definition" "api_task" {
 }
 
 resource "aws_iam_role" "service" {
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  name               = "${var.name}_api_service"
+  assume_role_policy = data.aws_iam_policy_document.service_assume_role.json
+  name               = "${var.name}-service"
 }
 
 resource "aws_iam_role_policy_attachment" "service" {

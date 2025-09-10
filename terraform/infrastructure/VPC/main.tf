@@ -153,7 +153,7 @@ resource "aws_subnet" "ecs-control-plane_private_us_west_2a" {
 resource "aws_subnet" "ecs-control-plane_private_us_west_2b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.30.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = false
 
   tags = {
@@ -164,7 +164,7 @@ resource "aws_subnet" "ecs-control-plane_private_us_west_2b" {
 resource "aws_subnet" "ecs-control-plane_private_us_west_2c" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.40.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-west-2c"
   map_public_ip_on_launch = false
 
   tags = {
@@ -187,7 +187,7 @@ resource "aws_subnet" "ecr-api_private_us_west_2a" {
 resource "aws_subnet" "ecr-api_private_us_west_2b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.60.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = false
 
   tags = {
@@ -198,7 +198,7 @@ resource "aws_subnet" "ecr-api_private_us_west_2b" {
 resource "aws_subnet" "ecr-api_private_us_west_2c" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.70.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-west-2c"
   map_public_ip_on_launch = false
 
   tags = {
@@ -220,7 +220,7 @@ resource "aws_subnet" "ecr-dkr_private_us_west_2a" {
 resource "aws_subnet" "ecr-dkr_private_us_west_2b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.90.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = false
 
   tags = {
@@ -231,7 +231,7 @@ resource "aws_subnet" "ecr-dkr_private_us_west_2b" {
 resource "aws_subnet" "ecr-dkr_private_us_west_2c" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.100.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-west-2c"
   map_public_ip_on_launch = false
 
   tags = {
