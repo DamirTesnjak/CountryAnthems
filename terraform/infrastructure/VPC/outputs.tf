@@ -54,3 +54,30 @@ output "public_subnet_bastion" {
 output "private_ec2_subnet_id" {
   value = aws_subnet.private_ec2.id
 }
+
+output "ecs_control" {
+  description = "ECS control subnets"
+  value = [
+    aws_subnet.ecs-control-plane_private_us_west_2a.id,
+    aws_subnet.ecs-control-plane_private_us_west_2b.id,
+    aws_subnet.ecs-control-plane_private_us_west_2c.id,
+  ]
+}
+
+output "ecr_api" {
+  description = "ECS API subnets"
+  value = [
+    aws_subnet.ecr-api_private_us_west_2a.id,
+    aws_subnet.ecr-api_private_us_west_2b.id,
+    aws_subnet.ecr-api_private_us_west_2c.id,
+  ]
+}
+
+output "ecr_dkr" {
+  description = "ECR Docker registry subnets"
+  value = [
+    aws_subnet.ecr-dkr_private_us_west_2a.id,
+    aws_subnet.ecr-dkr_private_us_west_2b.id,
+    aws_subnet.ecr-dkr_private_us_west_2c.id,
+  ]
+}

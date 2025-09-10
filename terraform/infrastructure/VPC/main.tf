@@ -139,6 +139,106 @@ resource "aws_subnet" "private_ec2" {
   }
 }
 
+resource "aws_subnet" "ecs-control-plane_private_us_west_2a" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.20.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecs-control-plane_private_us_west_2a"
+  }
+}
+
+resource "aws_subnet" "ecs-control-plane_private_us_west_2b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.30.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecs-control-plane_private_us_west_2b"
+  }
+}
+
+resource "aws_subnet" "ecs-control-plane_private_us_west_2c" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.40.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecs-control-plane_private_us_west_2c"
+  }
+}
+
+
+resource "aws_subnet" "ecr-api_private_us_west_2a" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.50.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecr-api_private_us_west_2a"
+  }
+}
+
+resource "aws_subnet" "ecr-api_private_us_west_2b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.60.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecr-api_private_us_west_2b"
+  }
+}
+
+resource "aws_subnet" "ecr-api_private_us_west_2c" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.70.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecr-api_private_us_west_2c"
+  }
+}
+
+resource "aws_subnet" "ecr-dkr_private_us_west_2a" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.80.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecr-dkr_private_us_west_2a"
+  }
+}
+
+resource "aws_subnet" "ecr-dkr_private_us_west_2b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.90.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecr-dkr_private_us_west_2b"
+  }
+}
+
+resource "aws_subnet" "ecr-dkr_private_us_west_2c" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.100.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "ecr-dkr_private_us_west_2c"
+  }
+}
+
 # Associate subnets with public route table
 resource "aws_route_table_association" "public_bastion" {
   subnet_id      = aws_subnet.public_bastion.id

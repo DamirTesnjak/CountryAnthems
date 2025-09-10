@@ -85,4 +85,7 @@ module "ec2" {
   vpc_id                = module.vpc.vpc_id
   name                  = "${var.name}-${var.env_name}"
   private_ec2_subnet_id = module.vpc.private_ec2_subnet_id
+  ecs_control = module.vpc.ecs_control
+  ecr_api = module.vpc.ecr_api
+  ecr_dkr = module.vpc.ecr_dkr
 }
