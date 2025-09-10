@@ -3,8 +3,8 @@ resource "aws_cloudwatch_log_group" "this" {
   retention_in_days = 30
 }
 
-resource "aws_ecs_cluster" "api" {
-  name = "${var.name}-api"
+resource "aws_ecs_cluster" "cluster" {
+  name = "${var.name}-cluster"
 
   setting {
     name  = "containerInsights"
@@ -132,7 +132,7 @@ resource "aws_lb_target_group" "service" {
 
 resource "aws_ecs_service" "api" {
   name            = "${var.name}-service"
-  cluster         = aws_ecs_cluster.api.id
+  cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.api_task.arn
   desired_count   = 1
   depends_on      = [aws_iam_role_policy_attachment.service]

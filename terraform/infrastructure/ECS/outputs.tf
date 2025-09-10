@@ -8,7 +8,7 @@ output db_name {
 
 
 output aws_ecs_cluster_api_arn {
-    value = aws_ecs_cluster.api.arn
+    value = aws_ecs_cluster.cluster.arn
 }
 
 output aws_lb_target_group_service_arn {

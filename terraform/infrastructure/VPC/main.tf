@@ -128,6 +128,17 @@ resource "aws_subnet" "public_bastion" {
   }
 }
 
+resource "aws_subnet" "private_ec2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.11.0/24"
+  availability_zone       = "us-west-2a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private_subnet_ec2"
+  }
+}
+
 # Associate subnets with public route table
 resource "aws_route_table_association" "public_bastion" {
   subnet_id      = aws_subnet.public_bastion.id

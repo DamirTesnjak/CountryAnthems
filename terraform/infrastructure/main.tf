@@ -78,3 +78,11 @@ module "bastion" {
   public_subnet_bastion = module.vpc.public_subnet_bastion
   bastion_ingress = var.bastion_ingress
 }
+
+module "ec2" {
+  source = "./EC2"
+
+  vpc_id                = module.vpc.vpc_id
+  name                  = "${var.name}-${var.env_name}"
+  private_ec2_subnet_id = module.vpc.private_ec2_subnet_id
+}

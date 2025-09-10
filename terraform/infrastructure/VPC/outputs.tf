@@ -50,3 +50,7 @@ output "security_group_alb_id" {
 output "public_subnet_bastion" {
   value = aws_subnet.public_bastion.id
 }
+
+output "private_ec2_subnet_id" {
+  value = aws_subnet.private_ec2.id
+}

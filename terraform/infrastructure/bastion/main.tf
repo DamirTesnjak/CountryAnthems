@@ -47,7 +47,7 @@ resource "aws_instance" "bastion" {
     ami = "ami-03aa99ddf5498ceb9"
     instance_type = "t3a.micro"
     key_name = aws_key_pair.bastion.key_name
-    monitoring = true
+    monitoring = false
     associate_public_ip_address = true
     subnet_id = var.public_subnet_bastion
 
