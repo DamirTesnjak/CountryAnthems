@@ -22,7 +22,7 @@ resource "null_resource" "push_to_ecr" {
     export REPO_URL="${aws_ecr_repository.this.repository_url}"
     export NAME="${var.name}"
     export IMAGE_TAG="${var.image_tag}"
-    cd ../../../be/api"
+    cd ../../../be/api
     chmod +x ./push_to_ecr.sh
     ./push_to_ecr.sh
     EOT
