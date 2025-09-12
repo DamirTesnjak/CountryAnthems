@@ -51,7 +51,7 @@ module "ecs" {
   vpc_id                = module.vpc.vpc_id
   name                  = "${var.name}-${var.env_name}"
   port                  = var.ecs_port
-  ecs_subnets           = module.vpc.ecs_subnets
+  ecs_agent_subnets           = module.vpc.ecs_agent_subnets
   security_group_ecs_id = module.vpc.security_group_ecs_id
   pg_host = module.rds.pg_host
   pg_password = module.rds.pg_password
@@ -95,5 +95,6 @@ module "ec2" {
   ssm_subnets = module.vpc.ssm_subnets
   security_group_alb_id = module.vpc.security_group_alb_id
   security_group_vpc_endpoints_id = module.vpc.security_group_vpc_endpoints_id
+  security_group_ecs_id = module.vpc.security_group_ecs_id
   bastion_ingress = var.bastion_ingress
 }

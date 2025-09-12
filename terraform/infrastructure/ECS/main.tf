@@ -142,7 +142,7 @@ resource "aws_ecs_service" "api" {
   depends_on      = [aws_iam_role_policy_attachment.service]
 
   network_configuration {
-    subnets         = var.ecs_subnets
+    subnets         = var.ecs_agent_subnets
     security_groups = [data.aws_security_group.security_group_ecs.id]
     assign_public_ip = false
   }

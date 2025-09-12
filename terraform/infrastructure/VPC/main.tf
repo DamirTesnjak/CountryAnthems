@@ -370,22 +370,6 @@ resource "aws_route_table_association" "public_5_us_west_2c" {
   route_table_id = var.aws_route_table_public_id
 }
 
-resource "aws_route_table_association" "ecs-control-plane_private_us_west_2a" {
-  subnet_id      = aws_subnet.ecs-control-plane_private_us_west_2a.id
-  route_table_id = var.route_table_private_id
-}
-
-resource "aws_route_table_association" "ecs-control-plane_private_us_west_2b" {
-  subnet_id      = aws_subnet.ecs-control-plane_private_us_west_2b.id
-  route_table_id = var.route_table_private_id
-}
-
-resource "aws_route_table_association" "ecs-control-plane_private_us_west_2c" {
-  subnet_id      = aws_subnet.ecs-control-plane_private_us_west_2c.id
-  route_table_id = var.route_table_private_id
-}
-
-
 resource "aws_route_table_association" "ecs_agent_private_us_west_2a" {
   subnet_id      = aws_subnet.ecs_agent_private_us_west_2a.id
   route_table_id = var.route_table_private_id

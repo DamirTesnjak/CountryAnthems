@@ -59,6 +59,16 @@ resource "aws_vpc_security_group_egress_rule" "ecs_allow_private" {
   to_port                      = var.ecs_port
 }
 
+resource "aws_security_group_rule" "ecs_outbound_https" {
+  type              = "egress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]  # Or just VPC CIDR: ["10.0.0.0/16"]
+  security_group_id = aws_security_group.security_group_ecs.id
+}
+
+
 #------------------------------------------------------------------------------
 
 resource "aws_security_group" "security_group_db" {
@@ -123,14 +133,15 @@ resource "aws_security_group" "vpc_endpoints" {
   vpc_id      = var.vpc_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_from_EC2" {
-  description                  = "Allow traffic from EC2"
-  from_port                    = 443
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.vpc_endpoints.id
-  security_group_id            = aws_security_group.vpc_endpoints.id
-  to_port                      = 443
+resource "aws_security_group_rule" "vpc_endpoint_from_ecs" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.security_group_ecs.id  # ECS instances SG
+  security_group_id        = aws_security_group.vpc_endpoints.id  # VPC endpoint SG
 }
+
 
 resource "aws_vpc_security_group_ingress_rule" "allow_from_EC2_2" {
   description                  = "Allow traffic from EC2"

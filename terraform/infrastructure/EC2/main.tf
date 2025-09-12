@@ -42,7 +42,6 @@ resource "aws_iam_role" "ecs_instance_role" {
   })
 }
 
-
 # Instance Profile
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
   name = "ecsInstanceProfile"
@@ -76,7 +75,7 @@ resource "aws_vpc_endpoint" "ecs" {
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = var.ecs_control
+  subnet_ids          = var.ecs_agent_subnets
   security_group_ids  = [var.security_group_vpc_endpoints_id]
 
   private_dns_enabled = true
@@ -84,21 +83,6 @@ resource "aws_vpc_endpoint" "ecs" {
   tags = {
     Name = "ecs-interface-endpoint"
   }
-}
-
-resource "aws_vpc_endpoint" "ecs_agent" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-agent"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = var.ecs_agent_subnets
-  security_group_ids  = [var.security_group_vpc_endpoints_id]
-
-  private_dns_enabled = true
-
-  tags = {
-    Name = "ecs-agent-interface-endpoint"
-  }
-
 }
 
 resource "aws_vpc_endpoint" "ecs_telemetry" {
@@ -172,7 +156,7 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = false
-    security_groups             = [var.security_group_vpc_endpoints_id]
+    security_groups             = [var.security_group_ecs_id]
   }
 
     user_data = base64encode(templatefile("${path.module}/user_data.sh", {
@@ -190,7 +174,7 @@ resource "aws_autoscaling_group" "asg" {
   max_size           = 2
   min_size           = 1
   protect_from_scale_in = true
-  vpc_zone_identifier = var.ecs_control
+  vpc_zone_identifier = var.ecs_agent_subnets
   launch_template {
     id      = aws_launch_template.this.id
     version = "$Latest"

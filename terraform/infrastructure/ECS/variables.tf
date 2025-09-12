@@ -15,7 +15,7 @@ variable "bucket_domain_name" {
   type = string
 }
 
-variable "ecs_subnets" {
+variable "ecs_agent_subnets" {
   type = list(string)
 }
 
