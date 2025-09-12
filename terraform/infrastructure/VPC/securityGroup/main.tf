@@ -40,7 +40,7 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private" {
   to_port                      = var.ecs_port
 }
 
-resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private" {
+resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private_2" {
   description                  = "HTTPS from ALB"
   from_port                    = 443
   ip_protocol                  = "tcp"
@@ -127,17 +127,25 @@ resource "aws_vpc_security_group_ingress_rule" "allow_from_EC2" {
   description                  = "Allow traffic from EC2"
   from_port                    = 443
   ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.security_group_ecs.id
-  security_group_id            = aws_security_group.ecs_instances.id
+  referenced_security_group_id = aws_security_group.vpc_endpoints.id
+  security_group_id            = aws_security_group.vpc_endpoints.id
   to_port                      = 443
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_from_EC2_2" {
+  description                  = "Allow traffic from EC2"
+  cidr_ipv4 = "10.0.0.0/16"
+  from_port                    = 22
+  ip_protocol                  = "tcp"
+  security_group_id            = aws_security_group.vpc_endpoints.id
+  to_port                      = 22
 }
 
 resource "aws_vpc_security_group_egress_rule" "all_outbound" {
   description       = "All outbound traffic"
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
-  referenced_security_group_id = aws_security_group.security_group_ecs.id
-  security_group_id = aws_security_group.ecs_instances.id
+  security_group_id = aws_security_group.vpc_endpoints.id
 }
 
 #---------------------------------------------------------------------------------------------------

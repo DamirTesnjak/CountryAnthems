@@ -3,7 +3,7 @@ output "security_group_db_id" {
 }
 
 output "security_group_vpc_endpoints_id" {
-  value = module.security_group.security_group_vpc_endpoints_id
+  value = module.securityGroup.security_group_vpc_endpoints_id
 }
 
 output "vpc_id" {
@@ -98,9 +98,9 @@ output "ecr_dkr_subnets" {
 output "ecr_api_subnets" {
   description = "CloudFront logs subnets"
   value = [
-    aws_subnet.ecr_api_logs_private_us_west_2a.id,
-    aws_subnet.ecr_api_logs_private_us_west_2b.id,
-    aws_subnet.ecr_api_logs_private_us_west_2c.id,
+    aws_subnet.ecr_api_private_us_west_2a.id,
+    aws_subnet.ecr_api_private_us_west_2b.id,
+    aws_subnet.ecr_api_private_us_west_2c.id,
   ]
 }
 
