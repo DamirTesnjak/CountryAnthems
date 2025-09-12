@@ -2,6 +2,10 @@ output "security_group_db_id" {
   value = module.securityGroup.security_group_db_id
 }
 
+output "security_group_vpc_endpoints_id" {
+  value = module.security_group.security_group_vpc_endpoints_id
+}
+
 output "vpc_id" {
   description = "VPC id value"
   value       = aws_vpc.main.id
@@ -64,20 +68,47 @@ output "ecs_control" {
   ]
 }
 
-output "ecr_api" {
-  description = "ECS API subnets"
+output "ecs_agent_subnets" {
+  description = "ECS agent subnets"
   value = [
-    aws_subnet.ecr-api_private_us_west_2a.id,
-    aws_subnet.ecr-api_private_us_west_2b.id,
-    aws_subnet.ecr-api_private_us_west_2c.id,
+    aws_subnet.ecs_agent_private_us_west_2a.id,
+    aws_subnet.ecs_agent_private_us_west_2b.id,
+    aws_subnet.ecs_agent_private_us_west_2c.id,
   ]
 }
 
-output "ecr_dkr" {
-  description = "ECR Docker registry subnets"
+output "ecs_telemetry_subnets" {
+  description = "ECS telemetry subnets"
   value = [
-    aws_subnet.ecr-dkr_private_us_west_2a.id,
-    aws_subnet.ecr-dkr_private_us_west_2b.id,
-    aws_subnet.ecr-dkr_private_us_west_2c.id,
+    aws_subnet.ecs_telemetry_private_us_west_2a.id,
+    aws_subnet.ecs_telemetry_private_us_west_2b.id,
+    aws_subnet.ecs_telemetry_private_us_west_2c.id,
+  ]
+}
+
+output "ecr_dkr_subnets" {
+  description = "ECR subnets"
+  value = [
+    aws_subnet.ecr_dkr_private_us_west_2a.id,
+    aws_subnet.ecr_dkr_private_us_west_2b.id,
+    aws_subnet.ecr_dkr_private_us_west_2c.id,
+  ]
+}
+
+output "ecr_api_subnets" {
+  description = "CloudFront logs subnets"
+  value = [
+    aws_subnet.ecr_api_logs_private_us_west_2a.id,
+    aws_subnet.ecr_api_logs_private_us_west_2b.id,
+    aws_subnet.ecr_api_logs_private_us_west_2c.id,
+  ]
+}
+
+output "ssm_subnets" {
+  description = "SSM subnets"
+  value = [
+    aws_subnet.ssm_private_us_west_2a.id,
+    aws_subnet.ssm_private_us_west_2b.id,
+    aws_subnet.ssm_private_us_west_2c.id,
   ]
 }

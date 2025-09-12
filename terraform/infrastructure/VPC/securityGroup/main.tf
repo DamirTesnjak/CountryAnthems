@@ -32,12 +32,21 @@ resource "aws_security_group" "security_group_ecs" {
 
 # allowing connection to ECS
 resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private" {
-  description                  = "Allow private to access ecs"
+  description                  = "HTTP from ALB"
   from_port                    = var.ecs_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.security_group_alb.id
   security_group_id            = aws_security_group.security_group_ecs.id
   to_port                      = var.ecs_port
+}
+
+resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private" {
+  description                  = "HTTPS from ALB"
+  from_port                    = 443
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.security_group_alb.id
+  security_group_id            = aws_security_group.security_group_ecs.id
+  to_port                      = 443
 }
 
 # allowing output from ECS
@@ -106,3 +115,29 @@ resource "aws_vpc_security_group_egress_rule" "bastion_to_rds" {
   security_group_id            = aws_security_group.security_group_db.id
   to_port                      = var.db_port
 }
+
+#---------------------------------------------------------------------------------------------------
+resource "aws_security_group" "vpc_endpoints" {
+  name        = "Security_VPC_endpoints"
+  description = "Security group for VPC endpoints"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_from_EC2" {
+  description                  = "Allow traffic from EC2"
+  from_port                    = 443
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.security_group_ecs.id
+  security_group_id            = aws_security_group.ecs_instances.id
+  to_port                      = 443
+}
+
+resource "aws_vpc_security_group_egress_rule" "all_outbound" {
+  description       = "All outbound traffic"
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+  referenced_security_group_id = aws_security_group.security_group_ecs.id
+  security_group_id = aws_security_group.ecs_instances.id
+}
+
+#---------------------------------------------------------------------------------------------------

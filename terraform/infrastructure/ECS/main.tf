@@ -10,6 +10,10 @@ resource "aws_ecs_cluster" "cluster" {
     name  = "containerInsights"
     value = "enabled"
   }
+
+  depends_on = [
+    var.capacity_provider_id
+  ]
 }
 
 resource "aws_iam_role" "execution" {

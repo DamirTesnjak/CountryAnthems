@@ -9,6 +9,7 @@ module "vpc" {
   alb_port           = var.alb_port
   bastion_ingress = var.bastion_ingress
   aws_route_table_public_id = module.cloud_front.aws_route_table_public_id
+  route_table_private_id = module.ec2.route_table_private_id
 }
 
 module "rds" {
@@ -56,6 +57,7 @@ module "ecs" {
   pg_password = module.rds.pg_password
   pg_db = module.rds.pg_db
   cloudfront_domain = module.cloud_front.cloudfront_domain
+  capacity_provider_id = module.ec2.capacity_provider_id
 }
 
 module "cloud_front" {
@@ -86,6 +88,12 @@ module "ec2" {
   name                  = "${var.name}-${var.env_name}"
   private_ec2_subnet_id = module.vpc.private_ec2_subnet_id
   ecs_control = module.vpc.ecs_control
-  ecr_api = module.vpc.ecr_api
-  ecr_dkr = module.vpc.ecr_dkr
+  ecs_agent_subnets = module.vpc.ecs_agent_subnets
+  ecs_telemetry_subnets = module.vpc.ecs_telemetry_subnets
+  ecr_dkr_subnets = module.vpc.ecr_dkr_subnets
+  ecr_api_subnets = module.vpc.ecr_api_subnets
+  ssm_subnets = module.vpc.ssm_subnets
+  security_group_alb_id = module.vpc.security_group_alb_id
+  security_group_vpc_endpoints_id = module.vpc.security_group_vpc_endpoints_id
+  bastion_ingress = var.bastion_ingress
 }

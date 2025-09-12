@@ -50,3 +50,7 @@ variable "pg_db" {
 variable "cloudfront_domain" {
   type = string
 }
+
+variable "capacity_provider_id" {
+  type = string
+}
