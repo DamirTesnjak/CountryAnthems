@@ -8,12 +8,6 @@ resource "aws_key_pair" "bastion" {
   public_key = tls_private_key.bastion.public_key_openssh
 }
 
-resource "aws_ssm_parameter" "bastion-private-key" {
-  name  = "/${var.name}/bastion/private-key"
-  type  = "SecureString"
-  value = tls_private_key.bastion.private_key_pem
-}
-
 resource "aws_security_group" "bastion_sg" {
   name        = "Security for bastion"
   description = "Security group for bastion"

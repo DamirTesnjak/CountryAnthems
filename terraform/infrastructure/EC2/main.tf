@@ -20,6 +20,43 @@ resource "aws_security_group" "vpc_endpoints" {
   vpc_id      = var.vpc_id
 }
 
+# Allow outbound HTTPS for ECS agent communication
+resource "aws_vpc_security_group_egress_rule" "allow_https_outbound" {
+  ip_protocol       = "tcp"
+  from_port         = 443
+  to_port           = 443
+  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id = aws_security_group.vpc_endpoints.id
+}
+
+# Allow outbound HTTP for package updates
+resource "aws_vpc_security_group_egress_rule" "allow_http_outbound" {
+  ip_protocol       = "tcp"
+  from_port         = 80
+  to_port           = 80
+  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id = aws_security_group.vpc_endpoints.id
+}
+
+# Allow DNS resolution
+resource "aws_vpc_security_group_egress_rule" "allow_dns_outbound" {
+  ip_protocol       = "udp"
+  from_port         = 53
+  to_port           = 53
+  cidr_ipv4         = "0.0.0.0/0"
+  security_group_id = aws_security_group.vpc_endpoints.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_bastion" {
+  ip_protocol                  = "tcp"
+  from_port                    = 22
+  to_port                      = 22
+  referenced_security_group_id = var.bastion_security_group_id  # Bastion security group
+  security_group_id           = aws_security_group.vpc_endpoints.id
+  description                 = "Allow SSH from bastion host"
+}
+
+
 resource "aws_vpc_security_group_ingress_rule" "allow_all_internal_ingress" {
   ip_protocol = "-1"
   referenced_security_group_id = aws_security_group.vpc_endpoints.id
@@ -72,7 +109,7 @@ resource "aws_vpc_endpoint" "ecr-dkr" {
 
 resource "aws_vpc_endpoint" "ecr-api" {
   vpc_id = var.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr-api"
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.api"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecr-api_selected_subnet_ids
   security_group_ids = [aws_security_group.vpc_endpoints.id]
@@ -112,7 +149,6 @@ resource "aws_vpc_endpoint" "S3-gateway" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.s3"
   vpc_endpoint_type = "Gateway"
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
 }
 
 #Private key
@@ -124,6 +160,11 @@ resource "tls_private_key" "ec2" {
 resource "aws_key_pair" "ec2" {
   key_name   = "${var.name}-ec2"
   public_key = tls_private_key.ec2.public_key_openssh
+}
+
+resource "local_file" "ec2-my-keys" {
+  content = tls_private_key.ec2.private_key_pem
+  filename = "${var.name}-ec2.pem"
 }
 
 resource "aws_iam_role" "this" {
@@ -145,7 +186,7 @@ resource "aws_iam_instance_profile" "this" {
 # Launch template
 resource "aws_launch_template" "this" {
   name          = "ec2-template"
-  image_id      = jsondecode(data.aws_ssm_parameter.ecs_optimized_ami.value)["image_id"]
+  image_id      = "ami-05f991e317f30f87a"
   key_name      = aws_key_pair.ec2.key_name
   instance_type = "t3a.micro"
 
@@ -176,14 +217,18 @@ resource "aws_launch_template" "this" {
     cluster_name = "${var.name}-cluster"
   }))
 
-  lifecycle {
-    create_before_destroy = true
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "ECS Instance"
+    }
   }
+
 }
 
 resource "aws_autoscaling_group" "asg" {
   name = "asg"
-  desired_capacity   = 1
+  desired_capacity   = 2
   max_size           = 5
   min_size           = 1
   protect_from_scale_in = true
@@ -193,14 +238,6 @@ resource "aws_autoscaling_group" "asg" {
     version = "$Latest"
   }
 
-   instance_refresh {
-    strategy = "Rolling"
-    triggers = ["tag"]
-
-    preferences {
-      min_healthy_percentage = 50
-    }
-  }
 
   tag {
     key                 = "AmazonECSManaged"
@@ -212,6 +249,20 @@ resource "aws_autoscaling_group" "asg" {
     key                 = "Name"
     propagate_at_launch = true
     value               = var.name
+  }
+}
+
+resource "aws_autoscaling_policy" "this" {
+  autoscaling_group_name = aws_autoscaling_group.asg.name
+  name                   = "${var.name}-cpu-target-tracking"
+  policy_type            = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+
+    target_value = 50
   }
 }
 
@@ -229,12 +280,5 @@ resource "aws_ecs_capacity_provider" "cp" {
 resource "aws_ecs_cluster_capacity_providers" "providers" {
   cluster_name = "${var.name}-cluster"
   capacity_providers = [aws_ecs_capacity_provider.cp.name]
-
-  default_capacity_provider_strategy {
-    base = 1
-    capacity_provider = aws_ecs_capacity_provider.cp.name
-    weight            = 100
-  }
-
   depends_on = [aws_ecs_capacity_provider.cp]
 }

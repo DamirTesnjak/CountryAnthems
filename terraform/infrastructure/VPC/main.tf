@@ -130,7 +130,7 @@ resource "aws_subnet" "private_9_us_west_2c" {
 
 resource "aws_subnet" "public_bastion" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.10.0/24"
+  cidr_block              = "10.0.11.0/24"
   availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
 

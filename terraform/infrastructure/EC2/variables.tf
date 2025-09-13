@@ -115,3 +115,8 @@ variable "private_subnet_config" {
 variable "security_group_alb_id" {
   type = string
 }
+
+variable "bastion_security_group_id" {
+  type = string
+}
+

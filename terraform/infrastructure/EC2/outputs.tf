@@ -5,3 +5,4 @@ output "capacity_provider_id" {
 output "ecs_agent_subnets" {
     value = local.ecs-agent_selected_subnet_ids
 }
+

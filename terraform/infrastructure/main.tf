@@ -86,4 +86,5 @@ module "ec2" {
   vpc_id                = module.vpc.vpc_id
   name                  = "${var.name}-${var.env_name}"
   security_group_alb_id = module.vpc.security_group_alb_id
+  bastion_security_group_id = module.bastion.security_group_bastion_id
 }
