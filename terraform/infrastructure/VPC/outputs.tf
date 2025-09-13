@@ -2,10 +2,6 @@ output "security_group_db_id" {
   value = module.securityGroup.security_group_db_id
 }
 
-output "security_group_vpc_endpoints_id" {
-  value = module.securityGroup.security_group_vpc_endpoints_id
-}
-
 output "vpc_id" {
   description = "VPC id value"
   value       = aws_vpc.main.id
@@ -53,62 +49,4 @@ output "security_group_alb_id" {
 
 output "public_subnet_bastion" {
   value = aws_subnet.public_bastion.id
-}
-
-output "private_ec2_subnet_id" {
-  value = aws_subnet.private_ec2.id
-}
-
-output "ecs_control" {
-  description = "ECS control subnets"
-  value = [
-    aws_subnet.ecs-control-plane_private_us_west_2a.id,
-    aws_subnet.ecs-control-plane_private_us_west_2b.id,
-    aws_subnet.ecs-control-plane_private_us_west_2c.id,
-  ]
-}
-
-output "ecs_agent_subnets" {
-  description = "ECS agent subnets"
-  value = [
-    aws_subnet.ecs_agent_private_us_west_2a.id,
-    aws_subnet.ecs_agent_private_us_west_2b.id,
-    aws_subnet.ecs_agent_private_us_west_2c.id,
-  ]
-}
-
-output "ecs_telemetry_subnets" {
-  description = "ECS telemetry subnets"
-  value = [
-    aws_subnet.ecs_telemetry_private_us_west_2a.id,
-    aws_subnet.ecs_telemetry_private_us_west_2b.id,
-    aws_subnet.ecs_telemetry_private_us_west_2c.id,
-  ]
-}
-
-output "ecr_dkr_subnets" {
-  description = "ECR subnets"
-  value = [
-    aws_subnet.ecr_dkr_private_us_west_2a.id,
-    aws_subnet.ecr_dkr_private_us_west_2b.id,
-    aws_subnet.ecr_dkr_private_us_west_2c.id,
-  ]
-}
-
-output "ecr_api_subnets" {
-  description = "CloudFront logs subnets"
-  value = [
-    aws_subnet.ecr_api_private_us_west_2a.id,
-    aws_subnet.ecr_api_private_us_west_2b.id,
-    aws_subnet.ecr_api_private_us_west_2c.id,
-  ]
-}
-
-output "ssm_subnets" {
-  description = "SSM subnets"
-  value = [
-    aws_subnet.ssm_private_us_west_2a.id,
-    aws_subnet.ssm_private_us_west_2b.id,
-    aws_subnet.ssm_private_us_west_2c.id,
-  ]
 }

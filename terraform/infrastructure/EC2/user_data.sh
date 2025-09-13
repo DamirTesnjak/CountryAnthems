@@ -5,6 +5,8 @@ yum update -y
 
 # Install additional packages if needed
 yum install -y awscli
+sudo yum update -y
+sudo yum install -y ecs-init
 
 # Configure ECS agent
 echo ECS_CLUSTER=${cluster_name} >> /etc/ecs/ecs.config

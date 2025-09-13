@@ -1,3 +1,121 @@
+# Subnets
+resource "aws_subnet" "private" {
+  for_each = var.private_subnet_config
+
+  vpc_id                  = var.vpc_id
+  cidr_block              = each.value.cidr_block
+  availability_zone       = each.value.availability_zone
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = each.key
+    Type = "Private"
+  }
+}
+
+# Security group
+resource "aws_security_group" "vpc_endpoints" {
+  name        = "Security_VPC_endpoints"
+  description = "Security group for VPC endpoints"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_all_internal_ingress" {
+  ip_protocol = "-1"
+  referenced_security_group_id = aws_security_group.vpc_endpoints.id
+  security_group_id = aws_security_group.vpc_endpoints.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_internal_egress" {
+  ip_protocol = "-1"
+  referenced_security_group_id = aws_security_group.vpc_endpoints.id
+  security_group_id = aws_security_group.vpc_endpoints.id
+}
+
+# ECS VPC Endpoints
+resource "aws_vpc_endpoint" "ecs-agent" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-agent"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ecs-agent_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ecs-telemetry" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-telemetry"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ecs-telemetry_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ecs" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ecs_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+# ECR VPC Endpoints
+resource "aws_vpc_endpoint" "ecr-dkr" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ecr-dkr_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ecr-api" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr-api"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ecr-api_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+# System manager VPC Endpoints
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ssm"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ssm_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ec2messages" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ec2messages"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ec2messages_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "ssmmessages" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.ssmmessages"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = local.ssmmessages_selected_subnet_ids
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+}
+
+# S3 Gateway
+resource "aws_vpc_endpoint" "S3-gateway" {
+  vpc_id = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.s3"
+  vpc_endpoint_type = "Gateway"
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+}
+
+#Private key
 resource "tls_private_key" "ec2" {
   algorithm = "RSA"
   rsa_bits  = 4096
@@ -8,131 +126,26 @@ resource "aws_key_pair" "ec2" {
   public_key = tls_private_key.ec2.public_key_openssh
 }
 
-resource "aws_ssm_parameter" "ec2-private-key" {
-  name  = "/${var.name}/ec2/private-key"
-  type  = "SecureString"
-  value = tls_private_key.ec2.private_key_pem
-}
-
-resource "local_file" "ec2-my-keys" {
-  content = tls_private_key.ec2.private_key_pem
-  filename = "${var.name}-ec2.pem"
+resource "aws_iam_role" "this" {
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  name               = var.name
 }
 
 # Attach the AWS managed policy for ECS
 resource "aws_iam_role_policy_attachment" "ecs_instance_role_policy" {
-  role       = aws_iam_role.ecs_instance_role.name
+  role       = aws_iam_role.this.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
-resource "aws_iam_role" "ecs_instance_role" {
-  name = "ecsInstanceRole"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
+resource "aws_iam_instance_profile" "this" {
+  name = var.name
+  role = aws_iam_role.this.name
 }
-
-# Instance Profile
-resource "aws_iam_instance_profile" "ecs_instance_profile" {
-  name = "ecsInstanceProfile"
-  role = aws_iam_role.ecs_instance_role.name
-}
-
-
-# Private route tables without internet access
-resource "aws_route_table" "private" {
-   vpc_id = var.vpc_id
-   
-   route {
-    cidr_block = "10.0.0.0/16"
-    gateway_id = "local"  # This keeps traffic within the VPC
-  }
-
-  tags = {
-    Name = "PrivateRouteTable"
-  }
-}
-
-# S3 Gateway Endpoint (Free)
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id       = var.vpc_id
-  service_name = "com.amazonaws.${data.aws_region.this.region}.s3"
-  route_table_ids = [aws_route_table.private.id]
-}
-
-# ECS Interface Endpoints
-resource "aws_vpc_endpoint" "ecs" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = var.ecs_agent_subnets
-  security_group_ids  = [var.security_group_vpc_endpoints_id]
-
-  private_dns_enabled = true
-
-  tags = {
-    Name = "ecs-interface-endpoint"
-  }
-}
-
-resource "aws_vpc_endpoint" "ecs_telemetry" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-telemetry"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = var.ecs_telemetry_subnets
-  security_group_ids  = [var.security_group_vpc_endpoints_id]
-
-  private_dns_enabled = true
-
-  tags = {
-    Name = "ecs-telemetry-interface-endpoint"
-  }
-}
-
-# ECR Interface Endpoints
-resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.dkr"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = var.ecr_dkr_subnets
-  security_group_ids  = [var.security_group_vpc_endpoints_id]
-
-  private_dns_enabled = true
-
-  tags = {
-    Name = "ecr-dkr-interface-endpoint"
-  }
-}
-
-resource "aws_vpc_endpoint" "ecr_api" {
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.api"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = var.ecr_api_subnets
-  security_group_ids  = [var.security_group_vpc_endpoints_id]
-
-  private_dns_enabled = true
-
-  tags = {
-    Name = "ecr-api-interface-endpoint"
-  }
-}
-
 
 # Launch template
 resource "aws_launch_template" "this" {
   name          = "ec2-template"
-  image_id      = data.aws_ami.ecs_optimized.id
+  image_id      = jsondecode(data.aws_ssm_parameter.ecs_optimized_ami.value)["image_id"]
   key_name      = aws_key_pair.ec2.key_name
   instance_type = "t3a.micro"
 
@@ -147,7 +160,7 @@ resource "aws_launch_template" "this" {
   }
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.ecs_instance_profile.name
+    name = aws_iam_instance_profile.this.name
   }
 
   monitoring {
@@ -156,7 +169,7 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = false
-    security_groups             = [var.security_group_ecs_id]
+    security_groups             = [aws_security_group.vpc_endpoints.id]
   }
 
     user_data = base64encode(templatefile("${path.module}/user_data.sh", {
@@ -171,10 +184,10 @@ resource "aws_launch_template" "this" {
 resource "aws_autoscaling_group" "asg" {
   name = "asg"
   desired_capacity   = 1
-  max_size           = 2
+  max_size           = 5
   min_size           = 1
   protect_from_scale_in = true
-  vpc_zone_identifier = var.ecs_agent_subnets
+  vpc_zone_identifier = local.ecs-agent_selected_subnet_ids
   launch_template {
     id      = aws_launch_template.this.id
     version = "$Latest"
@@ -225,4 +238,3 @@ resource "aws_ecs_cluster_capacity_providers" "providers" {
 
   depends_on = [aws_ecs_capacity_provider.cp]
 }
-

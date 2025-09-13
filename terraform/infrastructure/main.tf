@@ -9,7 +9,6 @@ module "vpc" {
   alb_port           = var.alb_port
   bastion_ingress = var.bastion_ingress
   aws_route_table_public_id = module.cloud_front.aws_route_table_public_id
-  route_table_private_id = module.ec2.route_table_private_id
 }
 
 module "rds" {
@@ -51,7 +50,7 @@ module "ecs" {
   vpc_id                = module.vpc.vpc_id
   name                  = "${var.name}-${var.env_name}"
   port                  = var.ecs_port
-  ecs_agent_subnets           = module.vpc.ecs_agent_subnets
+  ecs_agent_subnets           = module.ec2.ecs_agent_subnets
   security_group_ecs_id = module.vpc.security_group_ecs_id
   pg_host = module.rds.pg_host
   pg_password = module.rds.pg_password
@@ -86,15 +85,5 @@ module "ec2" {
 
   vpc_id                = module.vpc.vpc_id
   name                  = "${var.name}-${var.env_name}"
-  private_ec2_subnet_id = module.vpc.private_ec2_subnet_id
-  ecs_control = module.vpc.ecs_control
-  ecs_agent_subnets = module.vpc.ecs_agent_subnets
-  ecs_telemetry_subnets = module.vpc.ecs_telemetry_subnets
-  ecr_dkr_subnets = module.vpc.ecr_dkr_subnets
-  ecr_api_subnets = module.vpc.ecr_api_subnets
-  ssm_subnets = module.vpc.ssm_subnets
   security_group_alb_id = module.vpc.security_group_alb_id
-  security_group_vpc_endpoints_id = module.vpc.security_group_vpc_endpoints_id
-  security_group_ecs_id = module.vpc.security_group_ecs_id
-  bastion_ingress = var.bastion_ingress
 }
