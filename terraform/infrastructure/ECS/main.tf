@@ -16,6 +16,16 @@ resource "aws_ecs_cluster" "cluster" {
   ]
 }
 
+resource "aws_iam_policy" "execution_policy" {
+  name   = "${var.name}-execution"
+  policy = data.aws_iam_policy_document.execution_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "execution_policy" {
+  role       = aws_iam_role.execution.name
+  policy_arn = aws_iam_policy.execution_policy.arn
+}
+
 resource "aws_iam_role" "execution" {
   assume_role_policy = data.aws_iam_policy_document.execution_assume_role.json
   name               = "${var.name}-execution"
@@ -69,7 +79,7 @@ resource "aws_ecs_task_definition" "api_task" {
     {
       "image": "${var.image_registry}/${var.image_repository}:${var.image_tag}",
       "cpu": 256,
-      "memory": 1024,
+      "memory": 512,
       "essential": true,
       "name": "${var.name}_api_service",
       "portMappings": [

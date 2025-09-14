@@ -228,7 +228,7 @@ resource "aws_launch_template" "this" {
 
 resource "aws_autoscaling_group" "asg" {
   name = "asg"
-  desired_capacity   = 2
+  desired_capacity   = 1
   max_size           = 5
   min_size           = 1
   protect_from_scale_in = true
