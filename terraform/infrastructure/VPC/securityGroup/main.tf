@@ -59,6 +59,44 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_bastion" {
   description                 = "Allow SSH from bastion host"
 }
 
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_https_inbound" {
+  ip_protocol       = "tcp"
+  from_port         = 443
+  to_port           = 443
+  referenced_security_group_id = aws_security_group.security_group_ecs.id
+  security_group_id = aws_security_group.security_group_ecs.id
+}
+
+# Egress rule: Allow HTTPS outbound
+resource "aws_vpc_security_group_egress_rule" "vpc_endpoints_https_outbound" {
+  security_group_id = aws_security_group.security_group_ecs.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  description       = "Allow HTTPS outbound"
+}
+
+# Egress rule: Allow HTTP outbound
+resource "aws_vpc_security_group_egress_rule" "vpc_endpoints_http_outbound" {
+  security_group_id = aws_security_group.security_group_ecs.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  description       = "Allow HTTP outbound"
+}
+
+# Egress rule: Allow DNS outbound
+resource "aws_vpc_security_group_egress_rule" "vpc_endpoints_dns_outbound" {
+  security_group_id = aws_security_group.security_group_ecs.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 53
+  to_port           = 53
+  ip_protocol       = "udp"
+  description       = "Allow DNS outbound"
+}
+
 
 #------------------------------------------------------------------------------
 

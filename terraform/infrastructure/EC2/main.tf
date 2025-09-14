@@ -13,69 +13,13 @@ resource "aws_subnet" "private" {
   }
 }
 
-# Security group
-resource "aws_security_group" "vpc_endpoints" {
-  name        = "Security_VPC_endpoints"
-  description = "Security group for VPC endpoints"
-  vpc_id      = var.vpc_id
-}
-
-# Allow outbound HTTPS for ECS agent communication
-resource "aws_vpc_security_group_egress_rule" "allow_https_outbound" {
-  ip_protocol       = "tcp"
-  from_port         = 443
-  to_port           = 443
-  cidr_ipv4         = "0.0.0.0/0"
-  security_group_id = aws_security_group.vpc_endpoints.id
-}
-
-# Allow outbound HTTP for package updates
-resource "aws_vpc_security_group_egress_rule" "allow_http_outbound" {
-  ip_protocol       = "tcp"
-  from_port         = 80
-  to_port           = 80
-  cidr_ipv4         = "0.0.0.0/0"
-  security_group_id = aws_security_group.vpc_endpoints.id
-}
-
-# Allow DNS resolution
-resource "aws_vpc_security_group_egress_rule" "allow_dns_outbound" {
-  ip_protocol       = "udp"
-  from_port         = 53
-  to_port           = 53
-  cidr_ipv4         = "0.0.0.0/0"
-  security_group_id = aws_security_group.vpc_endpoints.id
-}
-
-resource "aws_vpc_security_group_ingress_rule" "allow_ssh_from_bastion" {
-  ip_protocol                  = "tcp"
-  from_port                    = 22
-  to_port                      = 22
-  referenced_security_group_id = var.bastion_security_group_id  # Bastion security group
-  security_group_id           = aws_security_group.vpc_endpoints.id
-  description                 = "Allow SSH from bastion host"
-}
-
-
-resource "aws_vpc_security_group_ingress_rule" "allow_all_internal_ingress" {
-  ip_protocol = "-1"
-  referenced_security_group_id = aws_security_group.vpc_endpoints.id
-  security_group_id = aws_security_group.vpc_endpoints.id
-}
-
-resource "aws_vpc_security_group_egress_rule" "allow_all_internal_egress" {
-  ip_protocol = "-1"
-  referenced_security_group_id = aws_security_group.vpc_endpoints.id
-  security_group_id = aws_security_group.vpc_endpoints.id
-}
-
 # ECS VPC Endpoints
 resource "aws_vpc_endpoint" "ecs-agent" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-agent"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs-agent_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -84,7 +28,7 @@ resource "aws_vpc_endpoint" "ecs-telemetry" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-telemetry"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs-telemetry_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -93,7 +37,7 @@ resource "aws_vpc_endpoint" "ecs" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -103,7 +47,7 @@ resource "aws_vpc_endpoint" "ecr-dkr" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecr-dkr_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -112,7 +56,7 @@ resource "aws_vpc_endpoint" "ecr-api" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.api"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecr-api_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -122,7 +66,7 @@ resource "aws_vpc_endpoint" "ssm" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ssm"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ssm_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -131,7 +75,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ec2messages"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ec2messages_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -140,7 +84,7 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ssmmessages"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ssmmessages_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [var.security_group_ecs_id]
   private_dns_enabled = true
 }
 
@@ -149,6 +93,7 @@ resource "aws_vpc_endpoint" "S3-gateway" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.s3"
   vpc_endpoint_type = "Gateway"
+  route_table_ids   = data.aws_route_tables.private.ids
 }
 
 #Private key
@@ -210,7 +155,7 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = false
-    security_groups             = [aws_security_group.vpc_endpoints.id]
+    security_groups             = [var.security_group_ecs_id]
   }
 
     user_data = base64encode(templatefile("${path.module}/user_data.sh", {
@@ -223,7 +168,6 @@ resource "aws_launch_template" "this" {
       Name = "ECS Instance"
     }
   }
-
 }
 
 resource "aws_autoscaling_group" "asg" {

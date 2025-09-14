@@ -120,3 +120,8 @@ variable "bastion_security_group_id" {
   type = string
 }
 
+variable "security_group_ecs_id" {
+  type = string
+}
+
+
