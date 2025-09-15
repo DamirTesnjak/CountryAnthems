@@ -29,3 +29,7 @@ variable "bastion_ingress" {
 variable "aws_route_table_public_id" {
   type = string
 }
+
+variable "vpc_endpoints_sg_id" {
+  type = string
+}

@@ -50,3 +50,11 @@ output "security_group_alb_id" {
 output "public_subnet_bastion" {
   value = aws_subnet.public_bastion.id
 }
+
+output "security_group_ecs_task_id" {
+  value = module.securityGroup.security_group_ecs_task_id
+}
+
+output "security_group_ecs_instance_id" {
+  value = module.securityGroup.security_group_ecs_instance_id
+}

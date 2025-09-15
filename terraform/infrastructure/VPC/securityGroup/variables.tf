@@ -22,3 +22,7 @@ variable "security_group_bastion_id" {
 variable "bastion_ingress" {
   type = string
 }
+
+variable "vpc_endpoints_sg_id" {
+  type = string
+}

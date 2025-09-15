@@ -27,6 +27,7 @@ module "securityGroup" {
   ecs_port = var.ecs_port
   alb_port = var.alb_port
   bastion_ingress = var.bastion_ingress
+  vpc_endpoints_sg_id = var.vpc_endpoints_sg_id
 }
 
 resource "aws_subnet" "public_1_us_west_2a" {

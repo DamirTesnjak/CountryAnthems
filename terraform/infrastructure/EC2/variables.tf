@@ -109,6 +109,18 @@ variable "private_subnet_config" {
       cidr_block        = "10.0.240.0/24"
       availability_zone = "us-west-2c"
     }
+    "private-cloudwatch-2a" = {
+      cidr_block        = "10.0.230.0/24"
+      availability_zone = "us-west-2a"
+    }
+    "private-cloudwatch-2b" = {
+      cidr_block        = "10.0.240.0/24"
+      availability_zone = "us-west-2b"
+    }
+    "private-cloudwatch-2c" = {
+      cidr_block        = "10.0.250.0/24"
+      availability_zone = "us-west-2c"
+    }
   }
 }
 
@@ -120,7 +132,11 @@ variable "bastion_security_group_id" {
   type = string
 }
 
-variable "security_group_ecs_id" {
+variable "security_group_ecs_task_id" {
+  type = string
+}
+
+variable "security_group_ecs_instance_id" {
   type = string
 }
 

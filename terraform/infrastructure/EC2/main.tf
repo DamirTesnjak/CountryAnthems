@@ -1,3 +1,24 @@
+# Security group for VPC endpoints
+resource "aws_security_group" "vpc_endpoints" {
+  name_prefix = "vpc-endpoints-"
+  description = "Security group for VPC endpoints"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "vpc-endpoints-sg"
+  }
+}
+
+# Inbound HTTPS from ECS tasks
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_from_ecs" {
+  ip_protocol                  = "tcp"
+  from_port                    = 443
+  to_port                      = 443
+  referenced_security_group_id = var.security_group_ecs_task_id
+  security_group_id           = aws_security_group.vpc_endpoints.id
+  description                 = "HTTPS from ECS tasks"
+}
+
 # Subnets
 resource "aws_subnet" "private" {
   for_each = var.private_subnet_config
@@ -19,7 +40,7 @@ resource "aws_vpc_endpoint" "ecs-agent" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-agent"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs-agent_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 }
 
@@ -28,7 +49,7 @@ resource "aws_vpc_endpoint" "ecs-telemetry" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-telemetry"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs-telemetry_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 }
 
@@ -37,7 +58,7 @@ resource "aws_vpc_endpoint" "ecs" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 }
 
@@ -47,7 +68,7 @@ resource "aws_vpc_endpoint" "ecr-dkr" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecr-dkr_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 }
 
@@ -56,7 +77,7 @@ resource "aws_vpc_endpoint" "ecr-api" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.api"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecr-api_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 }
 
@@ -66,7 +87,7 @@ resource "aws_vpc_endpoint" "ssm" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ssm"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ssm_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 }
 
@@ -75,7 +96,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ec2messages"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ec2messages_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 }
 
@@ -84,8 +105,22 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ssmmessages"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ssmmessages_selected_subnet_ids
-  security_group_ids = [var.security_group_ecs_id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
+}
+
+# CloudWatch Logs endpoint (for logging)
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.this.region}.logs"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = local.cloud_watch_selected_subnet_ids
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+
+  tags = {
+    Name = "logs-endpoint"
+  }
 }
 
 # S3 Gateway
@@ -155,7 +190,7 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = false
-    security_groups             = [var.security_group_ecs_id]
+    security_groups             = [var.security_group_ecs_instance_id]
   }
 
     user_data = base64encode(templatefile("${path.module}/user_data.sh", {

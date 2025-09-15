@@ -51,24 +51,10 @@ data "aws_iam_policy_document" "execution_policy" {
   }
 
   statement {
-    actions = [
-      "ecr:GetAuthorizationToken",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
     actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
     resources = [
       aws_cloudwatch_log_group.this.arn,
       "${aws_cloudwatch_log_group.this.arn}:*",
     ]
   }
-}
-
-data "aws_security_group" "security_group_ecs" {
-  id = var.security_group_ecs_id
 }

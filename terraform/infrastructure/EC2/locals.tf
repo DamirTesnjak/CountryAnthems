@@ -7,6 +7,7 @@ locals {
   selected_subnet_keys_ssm = ["private-ssm-2a", "private-ssm-2b", "private-ssm-2c"]
   selected_subnet_keys_ec2messages = ["private-ec2messages-2a", "private-ec2messages-2b", "private-ec2messages-2c"]
   selected_subnet_keys_ssmmessages = ["private-ssmmessages-2a", "private-ssmmessages-2b", "private-ssmmessages-2c"]
+  selected_subnet_keys_cloudwatch = ["private-cloudwatch-2a", "private-cloudwatch-2b", "private-cloudwatch-2c"]
 
 
   ecs-agent_selected_subnet_ids = [
@@ -39,5 +40,9 @@ locals {
 
   ssmmessages_selected_subnet_ids = [
     for k in local.selected_subnet_keys_ssmmessages : aws_subnet.private[k].id
+  ]
+
+  cloud_watch_selected_subnet_ids = [
+    for k in local.selected_subnet_keys_cloudwatch : aws_subnet.private[k].id
   ]
 }

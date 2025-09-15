@@ -129,6 +129,12 @@ resource "aws_iam_role" "service" {
   name               = "${var.name}-service"
 }
 
+resource "aws_iam_role_policy_attachment" "execution_ecr" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.execution.name
+}
+
+
 resource "aws_iam_role_policy_attachment" "service" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
   role       = aws_iam_role.service.name
@@ -149,12 +155,12 @@ resource "aws_ecs_service" "api" {
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.api_task.arn
   desired_count   = 1
+  launch_type     = "EC2" 
   depends_on      = [aws_iam_role_policy_attachment.service]
 
   network_configuration {
-    subnets         = var.ecs_agent_subnets
-    security_groups = [data.aws_security_group.security_group_ecs.id]
-    assign_public_ip = false
+    subnets          = var.ecs_agent_subnets  # Your subnet IDs
+    security_groups  = [var.security_group_ecs_task_id]
   }
 
   load_balancer {

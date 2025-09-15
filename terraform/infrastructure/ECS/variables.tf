@@ -19,7 +19,7 @@ variable "ecs_agent_subnets" {
   type = list(string)
 }
 
-variable "security_group_ecs_id" {
+variable "security_group_ecs_task_id" {
   type = string
 }
 
