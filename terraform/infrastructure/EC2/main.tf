@@ -14,7 +14,7 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_from_ecs" {
   ip_protocol                  = "tcp"
   from_port                    = 443
   to_port                      = 443
-  referenced_security_group_id = var.security_group_ecs_task_id
+  referenced_security_group_id = var.security_group_ecs_instance_id
   security_group_id           = aws_security_group.vpc_endpoints.id
   description                 = "HTTPS from ECS tasks"
 }

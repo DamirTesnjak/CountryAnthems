@@ -60,6 +60,37 @@ resource "aws_vpc_security_group_ingress_rule" "ec2_ssh" {
   description       = "SSH access from VPC"
 }
 
+# Egress rule: Allow HTTPS outbound
+resource "aws_vpc_security_group_egress_rule" "vpc_endpoints_https_outbound" {
+  security_group_id = aws_security_group.ecs_instance.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  description       = "Allow HTTPS outbound"
+}
+
+# Egress rule: Allow HTTP outbound
+resource "aws_vpc_security_group_egress_rule" "vpc_endpoints_http_outbound" {
+  security_group_id = aws_security_group.ecs_instance.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  description       = "Allow HTTP outbound"
+}
+
+# Egress rule: Allow DNS outbound
+resource "aws_vpc_security_group_egress_rule" "vpc_endpoints_dns_outbound" {
+  security_group_id = aws_security_group.ecs_instance.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 53
+  to_port           = 53
+  ip_protocol       = "udp"
+  description       = "Allow DNS outbound"
+}
+
+
 # All outbound traffic (for ECS agent, Docker pulls, etc.)
 resource "aws_vpc_security_group_egress_rule" "ec2_all_outbound" {
   ip_protocol       = "-1"

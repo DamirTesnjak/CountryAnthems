@@ -30,15 +30,6 @@ output "db_subnets" {
   ]
 }
 
-output "ecs_subnets" {
-  description = "ECS subnets"
-  value = [
-    aws_subnet.private_7_us_west_2a.id,
-    aws_subnet.private_8_us_west_2b.id,
-    aws_subnet.private_9_us_west_2c.id
-  ]
-}
-
 output "security_group_alb_id" {
   value = module.securityGroup.security_group_alb_id
 }
