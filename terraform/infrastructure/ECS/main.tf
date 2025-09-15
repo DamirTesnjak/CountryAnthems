@@ -87,7 +87,16 @@ resource "aws_ecs_task_definition" "api_task" {
           "containerPort": ${var.port} 
         }
       ],
-
+      "environment": [
+        {
+          "name": "API_PORT",
+          "value": ${var.port}
+        },
+        {
+          name  = "API_HOST"
+          value = "0.0.0.0"
+        }
+      ],
       "secrets": [
         {
           "name": "${aws_ssm_parameter.postgres_user.name}",

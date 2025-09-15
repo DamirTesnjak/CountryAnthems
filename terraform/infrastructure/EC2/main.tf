@@ -145,13 +145,9 @@ resource "aws_vpc_endpoint" "logs" {
   }
 }
 
-data "aws_route_table" "main" {
+# Get all route tables in VPC
+data "aws_route_tables" "all" {
   vpc_id = var.vpc_id
-  
-  filter {
-    name   = "association.main"
-    values = ["true"]
-  }
 }
 
 
@@ -160,9 +156,7 @@ resource "aws_vpc_endpoint" "S3-gateway" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.s3"
   vpc_endpoint_type = "Gateway"
-    route_table_ids   = [
-    data.aws_route_table.main.id,
-  ]
+    route_table_ids   = data.aws_route_tables.all.ids
 
 
   tags = {

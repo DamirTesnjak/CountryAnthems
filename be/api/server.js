@@ -1,6 +1,7 @@
 import express from "express";
 import pkg from "pg";
 import cors from "cors";
+import os from "os";
 
 const { Pool } = pkg;
 
@@ -86,6 +87,16 @@ app.get("/random-country", async (req, res) => {
   }
 });
 
-app.listen(process.env.API_PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://${process.env.API_HOST}:${port}`);
+const API_PORT = process.env.API_PORT || 5001;
+const API_HOST = process.env.API_HOST || "0.0.0.0";
+
+app.listen(API_PORT, API_HOST, () => {
+  console.log(`Server is running on http://${API_HOST}:${API_PORT}`);
+
+  // Optional: Also log the actual container IP for debugging
+  const networkInterfaces = os.networkInterfaces();
+  const containerIP = networkInterfaces.eth0?.[0]?.address;
+  if (containerIP) {
+    console.log(`Container accessible at: http://${containerIP}:${API_PORT}`);
+  }
 });
