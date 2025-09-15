@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/which-country", async (req, res) => {
+api.get("/which-country", async (req, res) => {
   let { lat, lng } = req.query;
 
   lat = parseFloat(lat);
@@ -76,7 +76,7 @@ app.get("/which-country", async (req, res) => {
   }
 });
 
-app.get("/random-country", async (req, res) => {
+api.get("/random-country", async (req, res) => {
   const sql = `
     SELECT name_en, ST_AsGeoJSON(geom) AS geom, country_iso, capital_city, anthem_label, anthem_audio
     FROM countries
