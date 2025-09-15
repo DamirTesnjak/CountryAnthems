@@ -6,7 +6,6 @@ import os from "os";
 const { Pool } = pkg;
 
 const app = express();
-const api = express.Router();
 
 const pool = new Pool({
   user: process.env.POSTGRES_USER,
@@ -20,6 +19,7 @@ const pool = new Pool({
 console.log("Database config loaded:", {
   user: process.env.POSTGRES_USER,
   host: process.env.POSTGRES_HOST,
+  origin: process.env.ORIGIN,
   database: process.env.POSTGRES_DB,
   // Don't log password!
 });
@@ -32,8 +32,6 @@ app.use(
   })
 );
 
-app.use("/api", api);
-
 app.get("/", (req, res) => {
   console.log("Health check requested from:", req.ip);
   res.status(200).json({
@@ -43,7 +41,7 @@ app.get("/", (req, res) => {
   });
 });
 
-api.get("/which-country", async (req, res) => {
+app.get("/api/which-country", async (req, res) => {
   let { lat, lng } = req.query;
 
   lat = parseFloat(lat);
@@ -76,7 +74,7 @@ api.get("/which-country", async (req, res) => {
   }
 });
 
-api.get("/random-country", async (req, res) => {
+app.get("/api/random-country", async (req, res) => {
   const sql = `
     SELECT name_en, ST_AsGeoJSON(geom) AS geom, country_iso, capital_city, anthem_label, anthem_audio
     FROM countries

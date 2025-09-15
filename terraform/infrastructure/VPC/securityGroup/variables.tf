@@ -26,3 +26,7 @@ variable "bastion_ingress" {
 variable "vpc_endpoints_sg_id" {
   type = string
 }
+
+variable "db_subnet_cidr" {
+  type = string
+}

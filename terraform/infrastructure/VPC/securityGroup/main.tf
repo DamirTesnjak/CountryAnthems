@@ -109,21 +109,21 @@ resource "aws_security_group" "security_group_db" {
 }
 
 # allowing connection to DB
-resource "aws_vpc_security_group_ingress_rule" "db_allow_private" {
+resource "aws_vpc_security_group_ingress_rule" "db_from_ecs" {
   description                  = "Allow private to access db"
   from_port                    = var.db_port
   ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.ecs_instance.id
+  referenced_security_group_id = aws_security_group.ecs_tasks.id
   security_group_id            = aws_security_group.security_group_db.id
   to_port                      = var.db_port
 }
 
 # allowing output from DB
-resource "aws_vpc_security_group_egress_rule" "db_allow_private" {
+resource "aws_vpc_security_group_egress_rule" "db_to_ecs" {
   description                  = "Allow private from db"
   from_port                    = var.db_port
   ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.ecs_instance.id
+  referenced_security_group_id = aws_security_group.ecs_tasks.id
   security_group_id            = aws_security_group.security_group_db.id
   to_port                      = var.db_port
 }
@@ -230,4 +230,14 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_task_allow_alb" {
   ip_protocol = "tcp"
   
   referenced_security_group_id = aws_security_group.security_group_alb.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "ecs_to_database" {
+  security_group_id = aws_security_group.ecs_tasks.id
+
+  description = "Allow ECS tasks to connect to PostgreSQL database"
+  ip_protocol = "tcp"
+  from_port   = var.db_port
+  to_port     = var.db_port
+  cidr_ipv4   = var.db_subnet_cidr
 }

@@ -28,6 +28,7 @@ module "securityGroup" {
   alb_port = var.alb_port
   bastion_ingress = var.bastion_ingress
   vpc_endpoints_sg_id = var.vpc_endpoints_sg_id
+  db_subnet_cidr = aws_subnet.private_6_us_west_2c.cidr_block
 }
 
 resource "aws_subnet" "public_1_us_west_2a" {
