@@ -16,8 +16,18 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_from_ecs" {
   to_port                      = 443
   referenced_security_group_id = var.security_group_ecs_instance_id
   security_group_id           = aws_security_group.vpc_endpoints.id
+  description                 = "HTTPS from ECS instance"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_from_ecs_task" {
+  ip_protocol                  = "tcp"
+  from_port                    = 443
+  to_port                      = 443
+  referenced_security_group_id = var.security_group_ecs_task_id
+  security_group_id           = aws_security_group.vpc_endpoints.id
   description                 = "HTTPS from ECS tasks"
 }
+
 
 # Subnets
 resource "aws_subnet" "private" {
@@ -89,6 +99,10 @@ resource "aws_vpc_endpoint" "ssm" {
   subnet_ids          = local.ssm_selected_subnet_ids
   security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
+
+  tags = {
+    Name = "ssm-endpoint"
+  }
 }
 
 resource "aws_vpc_endpoint" "ec2messages" {
@@ -98,6 +112,10 @@ resource "aws_vpc_endpoint" "ec2messages" {
   subnet_ids          = local.ec2messages_selected_subnet_ids
   security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
+
+  tags = {
+    Name = "ec2messages-endpoint"
+  }
 }
 
 resource "aws_vpc_endpoint" "ssmmessages" {
@@ -107,6 +125,10 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   subnet_ids          = local.ssmmessages_selected_subnet_ids
   security_group_ids = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
+
+  tags = {
+    Name = "ssmmessages-endpoint"
+  }
 }
 
 # CloudWatch Logs endpoint (for logging)
@@ -123,12 +145,29 @@ resource "aws_vpc_endpoint" "logs" {
   }
 }
 
+data "aws_route_table" "main" {
+  vpc_id = var.vpc_id
+  
+  filter {
+    name   = "association.main"
+    values = ["true"]
+  }
+}
+
+
 # S3 Gateway
 resource "aws_vpc_endpoint" "S3-gateway" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = data.aws_route_tables.private.ids
+    route_table_ids   = [
+    data.aws_route_table.main.id,
+  ]
+
+
+  tags = {
+    Name = "S3-gateway-endpoint"
+  }
 }
 
 #Private key
