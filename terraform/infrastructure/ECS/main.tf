@@ -79,7 +79,7 @@ resource "aws_ecs_task_definition" "api_task" {
     {
       "image": "${var.image_registry}/${var.image_repository}:${var.image_tag}",
       "cpu": 256,
-      "memory": 512,
+      "memory": 256,
       "essential": true,
       "name": "${var.name}_api_service",
       "portMappings": [

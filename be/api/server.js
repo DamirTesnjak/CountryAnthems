@@ -17,6 +17,13 @@ const pool = new Pool({
   ssl: false,
 });
 
+console.log("Database config loaded:", {
+  user: process.env.POSTGRES_USER,
+  host: process.env.POSTGRES_HOST,
+  database: process.env.POSTGRES_DB,
+  // Don't log password!
+});
+
 app.use(
   cors({
     origin: process.env.ORIGIN,
@@ -26,6 +33,15 @@ app.use(
 );
 
 app.use("/api", api);
+
+app.get("/", (req, res) => {
+  console.log("Health check requested from:", req.ip);
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    service: "country-anthems-api",
+  });
+});
 
 app.get("/which-country", async (req, res) => {
   let { lat, lng } = req.query;
@@ -85,15 +101,6 @@ app.get("/random-country", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Database error" });
   }
-});
-
-// Add this to your app before app.listen()
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-    service: "country-anthems-api",
-  });
 });
 
 const API_PORT = process.env.API_PORT || 5001;
