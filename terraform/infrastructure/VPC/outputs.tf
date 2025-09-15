@@ -39,10 +39,6 @@ output "ecs_subnets" {
   ]
 }
 
-output "security_group_ecs_id" {
-  value = module.securityGroup.security_group_ecs_id
-}
-
 output "security_group_alb_id" {
   value = module.securityGroup.security_group_alb_id
 }
