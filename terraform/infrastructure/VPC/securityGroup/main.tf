@@ -218,3 +218,16 @@ resource "aws_vpc_security_group_egress_rule" "ecs_internet_http" {
   security_group_id = aws_security_group.ecs_tasks.id
   description       = "HTTP to internet"
 }
+
+# Allow ALB to reach ECS tasks on port 5001
+resource "aws_vpc_security_group_ingress_rule" "ecs_task_allow_alb" {
+  security_group_id = aws_security_group.ecs_tasks.id
+  
+  description = "Allow ALB to reach ECS tasks on port 5001"
+  
+  from_port   = var.ecs_port
+  to_port     = var.ecs_port
+  ip_protocol = "tcp"
+  
+  referenced_security_group_id = aws_security_group.security_group_alb.id
+}
