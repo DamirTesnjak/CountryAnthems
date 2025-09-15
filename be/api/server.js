@@ -87,6 +87,15 @@ app.get("/random-country", async (req, res) => {
   }
 });
 
+// Add this to your app before app.listen()
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    service: "country-anthems-api",
+  });
+});
+
 const API_PORT = process.env.API_PORT || 5001;
 const API_HOST = process.env.API_HOST || "0.0.0.0";
 
