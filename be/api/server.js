@@ -13,7 +13,10 @@ const pool = new Pool({
   database: process.env.POSTGRES_DB,
   password: process.env.POSTGRES_PASSWORD,
   port: 5432,
-  ssl: false,
+  ssl: {
+    rejectUnauthorized: false,
+    sslmode: "prefer",
+  },
 });
 
 console.log("Database config loaded:", {
@@ -21,7 +24,6 @@ console.log("Database config loaded:", {
   host: process.env.POSTGRES_HOST,
   origin: process.env.ORIGIN,
   database: process.env.POSTGRES_DB,
-  // Don't log password!
 });
 
 app.use(
@@ -42,10 +44,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/which-country", async (req, res) => {
-  let { lat, lng } = req.query;
+  console.log("req.query →", req.url);
+  const rawQs = req._parsedUrl?.query || "";
+  const params = new URLSearchParams(rawQs);
 
-  lat = parseFloat(lat);
-  lng = parseFloat(lng);
+  const lat = parseFloat(params.get("lat") || "");
+  const lng = parseFloat(params.get("lng") || "");
+
+  console.log("coordinates, lat, lng", [lat, lng]);
 
   if (isNaN(lat) || isNaN(lng)) {
     return res.status(400).json({ error: "lat and lng required" });
@@ -60,6 +66,7 @@ app.get("/api/which-country", async (req, res) => {
 
   try {
     const { rows } = await pool.query(sql, [lng, lat]);
+    console.log("rows", rows);
     res.json({
       name: rows[0].name_en || "",
       geometry: JSON.parse(rows[0].geom),

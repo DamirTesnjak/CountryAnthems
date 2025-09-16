@@ -35,34 +35,11 @@ resource "aws_db_instance" "this" {
   port = 5432
 }
 
- resource "null_resource" "enable_postgis" {
+resource "null_resource" "import_geojson" {
   triggers = {
     bastion_id = var.aws_instance_bastion_id
   }
   depends_on = [aws_db_instance.this]
-
-  connection {
-    type        = "ssh"
-    host        = var.bastion_public_ip
-    user        = "ubuntu"
-    private_key = var.bastion_private_key
-  }
-
-  provisioner "remote-exec" {
-
-    inline = [
-       "sudo apt-get update",
-       "sudo apt-get install -y postgresql-client",
-      "PGPASSWORD='${random_string.password.result}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\""
-    ]
-  }
-}
-
-resource "null_resource" "seed_db" {
-  triggers = {
-    bastion_id = var.aws_instance_bastion_id
-  }
-  depends_on = [null_resource.enable_postgis]
 
   connection {
     type        = "ssh"
@@ -76,68 +53,14 @@ resource "null_resource" "seed_db" {
     destination = "/tmp/init.sql"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "PGPASSWORD='${random_string.password.result}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} --file=/tmp/init.sql"
-    ]
-  }
-}
-
-resource "null_resource" "import_geojson" {
-  triggers = {
-    bastion_id = var.aws_instance_bastion_id
-  }
-  depends_on = [null_resource.seed_db]
-
-  connection {
-    type        = "ssh"
-    host        = var.bastion_public_ip
-    user        = "ubuntu"
-    private_key = var.bastion_private_key
-  }
-
   provisioner "file" {
     source      = "${path.module}/migrations/02_import.sh"
     destination = "/tmp/import.sh"
   }
 
-   provisioner "file" {
+  provisioner "file" {
     source      = "${path.module}/migrations/countries.geojson"
     destination = "/tmp/countries.geojson"
-  }
-
-
-  provisioner "remote-exec" {
-    inline = [
-      "sed -i 's/\r$//' /tmp/import.sh",
-      "sudo apt-get update",
-      "sudo apt-get install -y gdal-bin dos2unix",
-      "dos2unix /tmp/import.sh",
-      "chmod +x /tmp/import.sh",
-      "export PGHOST=${aws_db_instance.this.address}",
-      "export PGPORT=${aws_db_instance.this.port}",
-      "export POSTGRES_USER=${var.db_user}",
-      "export POSTGRES_PASSWORD=${random_string.password.result}",
-      "export POSTGRES_DB=${aws_db_instance.this.db_name}",
-      "/tmp/import.sh"
-    ]
-  }
-}
-
-resource "null_resource" "populate_with_data" {
-  triggers = {
-    bastion_id = var.aws_instance_bastion_id
-    data_path  = "${path.module}/migrations/countries_capitals_anthems.json"
-    sql_file   = "${path.module}/migrations/update.sql"
-  }
-
-  depends_on = [null_resource.import_geojson]
-
-  connection {
-    type        = "ssh"
-    host        = var.bastion_public_ip
-    user        = "ubuntu"
-    private_key = var.bastion_private_key
   }
 
   provisioner "file" {
@@ -152,8 +75,20 @@ resource "null_resource" "populate_with_data" {
 
   provisioner "remote-exec" {
     inline = [
+      "sudo apt-get update",
+      "sudo apt-get install -y postgresql-client gdal-bin dos2unix",
+      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\"",
+      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} --file=/tmp/init.sql",
+      "dos2unix /tmp/import.sh",
+      "chmod +x /tmp/import.sh",
+      "export PGHOST=${aws_db_instance.this.address}",
+      "export PGPORT=${aws_db_instance.this.port}",
+      "export POSTGRES_USER=${var.db_user}",
+      "export POSTGRES_PASSWORD=${random_string.password.result}",
+      "export POSTGRES_DB=${aws_db_instance.this.db_name}",
+      "/tmp/import.sh",
       "sed \"s|__DATA_PATH__|/tmp/countries_capitals_anthems.json|g\" /tmp/update.sql > /tmp/update_parsed.sql",
-      "PGPASSWORD='${random_string.password.result}' psql -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -f /tmp/update.sql"
+      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.db_user} -d ${aws_db_instance.this.db_name} -f /tmp/update_parsed.sql"
     ]
   }
 }

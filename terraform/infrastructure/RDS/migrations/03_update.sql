@@ -15,7 +15,8 @@ CREATE TABLE country_extra (
 
 CREATE TEMP TABLE capitals_raw(json_text text);
 
-\copy capitals_raw FROM '__DATA_PATH__'
+-- Read the entire JSON array as a single line
+\copy capitals_raw FROM '__DATA_PATH__' (format text)
 
 INSERT INTO country_extra(country_wiki_data, country_label, capital_wiki_data, capital_label, anthem, anthem_label, anthem_audio)
 SELECT

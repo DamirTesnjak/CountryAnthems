@@ -14,6 +14,21 @@ resource "aws_vpc_security_group_ingress_rule" "alb_allow_private" {
   to_port           = var.alb_port
 }
 
+resource "aws_vpc_security_group_ingress_rule" "alb_https" {
+  security_group_id = "sg-02809867956458a69"
+  
+  description = "HTTPS from internet"
+  ip_protocol = "tcp"
+  from_port   = 443
+  to_port     = 443
+  cidr_ipv4   = "0.0.0.0/0"
+  
+  tags = {
+    Name = "ALB HTTPS Ingress"
+  }
+}
+
+
 # allowing output from ALB
 resource "aws_vpc_security_group_egress_rule" "alb_allow_private" {
   description       = "Allow from ALB"
@@ -239,5 +254,5 @@ resource "aws_vpc_security_group_egress_rule" "ecs_to_database" {
   ip_protocol = "tcp"
   from_port   = var.db_port
   to_port     = var.db_port
-  cidr_ipv4   = var.db_subnet_cidr
+  cidr_ipv4   = "10.0.0.0/16"  # Allow entire VPC
 }
