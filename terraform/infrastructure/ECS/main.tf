@@ -39,25 +39,25 @@ resource "aws_iam_role" "task" {
 resource "aws_ssm_parameter" "postgres_user" {
   name  = "POSTGRES_USER"
   type  = "SecureString"
-  value = "db_user"
+  value = "database_user"
 }
 
 resource "aws_ssm_parameter" "postgres_host" {
   name  = "POSTGRES_HOST"
   type  = "SecureString"
-  value = var.pg_host
+  value = var.database_host
 }
 
 resource "aws_ssm_parameter" "postgres_db" {
   name  = "POSTGRES_DB"
   type  = "SecureString"
-  value = var.pg_db
+  value = var.database_name
 }
 
 resource "aws_ssm_parameter" "postgres_password" {
   name  = "POSTGRES_PASSWORD"
   type  = "SecureString"
-  value = var.pg_password
+  value = var.database_password
 }
 
 resource "aws_ssm_parameter" "origin" {
@@ -168,8 +168,8 @@ resource "aws_ecs_service" "api" {
   depends_on      = [aws_iam_role_policy_attachment.service]
 
   network_configuration {
-    subnets          = var.ecs_agent_subnets  # Your subnet IDs
-    security_groups  = [var.security_group_ecs_task_id]
+    subnets          = var.ecs_agent_subnets_id
+    security_groups  = [var.ecs_sg_task_id]
   }
 
   load_balancer {

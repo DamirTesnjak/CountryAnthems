@@ -1,15 +1,15 @@
-output "security_group_db_id" {
+output "database_sg_id" {
   value = aws_security_group.security_group_db.id
 }
 
-output "security_group_alb_id" {
-  value = aws_security_group.security_group_alb.id
+output "loadBalancer_sg_id" {
+  value = aws_security_group.alb_sg.id
 }
 
-output "security_group_ecs_task_id" {
+output "ecs_sg_task_id" {
   value = aws_security_group.ecs_tasks.id
 }
 
-output "security_group_ecs_instance_id" {
+output "ecs_sg_id" {
   value = aws_security_group.ecs_instance.id
 }

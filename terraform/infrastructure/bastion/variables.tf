@@ -3,10 +3,11 @@ variable "name" {
 }
 
 variable "vpc_id" {
+    description = "Virtual Private Cloud ID"
     type = string
 }
 
-variable "public_subnet_bastion" {
+variable "bastion_public_subnet" {
     type = string
 }
 

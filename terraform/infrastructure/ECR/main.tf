@@ -1,3 +1,4 @@
+# New instance of ECR for docker images
 resource "aws_ecr_repository" "this" {
   name                 = var.name
   encryption_configuration {
@@ -5,6 +6,7 @@ resource "aws_ecr_repository" "this" {
   }
 }
 
+# Pushing Docker image to ECR
 resource "null_resource" "push_to_ecr" {
   depends_on = [aws_ecr_repository.this]
 

@@ -88,7 +88,7 @@ variable "private_subnet_config" {
   }
 }
 
-variable "security_group_alb_id" {
+variable "loadBalancer_sg_id" {
   type = string
 }
 
@@ -96,11 +96,11 @@ variable "bastion_security_group_id" {
   type = string
 }
 
-variable "security_group_ecs_task_id" {
+variable "ecs_sg_task_id" {
   type = string
 }
 
-variable "security_group_ecs_instance_id" {
+variable "ecs_sg_id" {
   type = string
 }
 

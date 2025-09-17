@@ -8,7 +8,7 @@ module "infrastructure" {
   name     = "country-anthems"
   env_name = "staging"
   bastion_ingress = local.bastion_ingress
-  db_port  = 5432
+  database_port  = 5432
   ecs_port = 5001
-  alb_port = 80
+  loadBalancer_port = 80
 }

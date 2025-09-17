@@ -6,6 +6,7 @@ resource "aws_internet_gateway" "this" {
   }
 }
 
+# Public route table
 resource "aws_route_table" "public" {
   vpc_id = var.vpc_id
 
@@ -15,12 +16,13 @@ resource "aws_route_table" "public" {
   }
 }
 
+# Load balancer instance configuration
 resource "aws_lb" "api" {
   name                       = "${var.name}-alb"
   internal                   = false
   load_balancer_type         = "application"
-  security_groups            = [var.security_group_alb_id]
-  subnets                    = var.alb_subnets
+  security_groups            = [var.loadBalancer_sg_id]
+  subnets                    = var.loadBalancer_subnets
   enable_deletion_protection = false
   idle_timeout               = 300
   preserve_host_header       = false
@@ -28,19 +30,19 @@ resource "aws_lb" "api" {
 
 resource "aws_lb_listener" "app_listener" {
   load_balancer_arn = aws_lb.api.arn
-  port              = var.alb_port
+  port              = var.loadBalancer_port
   protocol          = "HTTP"
 
   default_action {
     type = "forward"
-    target_group_arn = var.aws_lb_target_group_service_arn
+    target_group_arn = var.loadBalancer_tg_service_arn
   }
 }
 
 resource "aws_cloudfront_vpc_origin" "this" {
   vpc_origin_endpoint_config {
     arn                    = aws_lb.api.arn
-    http_port              = var.alb_port
+    http_port              = var.loadBalancer_port
     https_port             = 443
     name                   = "cluster-${var.name}"
     origin_protocol_policy = "http-only"
@@ -52,7 +54,7 @@ resource "aws_cloudfront_vpc_origin" "this" {
   }
 }
 
-
+# Allows us private access to S3
 resource "aws_cloudfront_origin_access_control" "s3_oac" {
   name                              = "s3-oac"
   description                       = "OAC for S3"
@@ -61,17 +63,21 @@ resource "aws_cloudfront_origin_access_control" "s3_oac" {
   signing_protocol                  = "sigv4"
 }
 
+# New instance of cloudfront distribution
 resource "aws_cloudfront_distribution" "cdn" {
   enabled             = true
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
 
+  # S3 bucket origin
   origin {
     domain_name              = var.bucket_regional_domain_name
     origin_id                = "s3-origin-${var.name}"
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
   }
 
+  # Load balancer origin, we access the APP API from the internet
+  # through load balancer
   origin {
     domain_name = aws_lb.api.dns_name
     origin_id   = "cluster-${var.name}"
@@ -81,6 +87,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
+  # For the frontend on S3
   default_cache_behavior {
     target_origin_id       = "s3-origin-${var.name}"
     viewer_protocol_policy = "redirect-to-https"
@@ -95,6 +102,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
+  # For the API
   ordered_cache_behavior {
     path_pattern           = "/api/*"
     target_origin_id       = "cluster-${var.name}"

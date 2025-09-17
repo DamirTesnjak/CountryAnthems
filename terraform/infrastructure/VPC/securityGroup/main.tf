@@ -1,4 +1,4 @@
-resource "aws_security_group" "security_group_alb" {
+resource "aws_security_group" "alb_sg" {
   name        = "Security_ALB"
   description = "Security group for ALB"
   vpc_id      = var.vpc_id
@@ -8,14 +8,14 @@ resource "aws_security_group" "security_group_alb" {
 resource "aws_vpc_security_group_ingress_rule" "alb_allow_private" {
   description       = "Allow connection from outside internet to access ALB"
   cidr_ipv4         = "0.0.0.0/0"
-  from_port         = var.alb_port
+  from_port         = var.loadBalancer_port
   ip_protocol       = "tcp"
-  security_group_id = aws_security_group.security_group_alb.id
-  to_port           = var.alb_port
+  security_group_id = aws_security_group.alb_sg.id
+  to_port           = var.loadBalancer_port
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb_https" {
-  security_group_id = "sg-02809867956458a69"
+  security_group_id = aws_security_group.alb_sg.id
   
   description = "HTTPS from internet"
   ip_protocol = "tcp"
@@ -28,13 +28,13 @@ resource "aws_vpc_security_group_ingress_rule" "alb_https" {
   }
 }
 
-
-# allowing output from ALB
 resource "aws_vpc_security_group_egress_rule" "alb_allow_private" {
   description       = "Allow from ALB"
-  cidr_ipv4         = "0.0.0.0/0"
-  ip_protocol       = "-1"
-  security_group_id = aws_security_group.security_group_alb.id
+  from_port                    = var.ecs_port
+  ip_protocol                  = "tcp"
+  to_port                      = var.ecs_port
+  referenced_security_group_id = aws_security_group.ecs_tasks.id
+  security_group_id = aws_security_group.alb_sg.id
 }
 
 #------------------------------------------------------------------------------
@@ -50,27 +50,27 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_allow_private" {
   description                  = "HTTP from ALB"
   from_port                    = var.ecs_port
   ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.security_group_alb.id
+  referenced_security_group_id = aws_security_group.alb_sg.id
   security_group_id            = aws_security_group.ecs_instance.id
   to_port                      = var.ecs_port
 }
 
-# allowing output from ECS
+# allowing outbound from ECS
 resource "aws_vpc_security_group_egress_rule" "ecs_allow_private" {
   description                  = "Allow private from ecs"
   from_port                    = var.ecs_port
   ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.security_group_alb.id
+  referenced_security_group_id = aws_security_group.alb_sg.id
   security_group_id            = aws_security_group.ecs_instance.id
   to_port                      = var.ecs_port
 }
 
-# SSH access (optional)
+#SSH access (optional)
 resource "aws_vpc_security_group_ingress_rule" "ec2_ssh" {
   ip_protocol       = "tcp"
   from_port         = 22
   to_port           = 22
-  cidr_ipv4         = "10.0.0.0/16"  # Your VPC CIDR
+  cidr_ipv4         = "10.0.0.0/16"  # VPC CIDR
   security_group_id = aws_security_group.ecs_instance.id
   description       = "SSH access from VPC"
 }
@@ -105,16 +105,6 @@ resource "aws_vpc_security_group_egress_rule" "vpc_endpoints_dns_outbound" {
   description       = "Allow DNS outbound"
 }
 
-
-# All outbound traffic (for ECS agent, Docker pulls, etc.)
-resource "aws_vpc_security_group_egress_rule" "ec2_all_outbound" {
-  ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
-  security_group_id = aws_security_group.ecs_instance.id
-  description       = "All outbound traffic"
-}
-
-
 #------------------------------------------------------------------------------
 
 resource "aws_security_group" "security_group_db" {
@@ -126,25 +116,27 @@ resource "aws_security_group" "security_group_db" {
 # allowing connection to DB
 resource "aws_vpc_security_group_ingress_rule" "db_from_ecs" {
   description                  = "Allow private to access db"
-  from_port                    = var.db_port
+  from_port                    = var.database_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.ecs_tasks.id
   security_group_id            = aws_security_group.security_group_db.id
-  to_port                      = var.db_port
+  to_port                      = var.database_port
 }
 
 # allowing output from DB
 resource "aws_vpc_security_group_egress_rule" "db_to_ecs" {
   description                  = "Allow private from db"
-  from_port                    = var.db_port
+  from_port                    = var.database_port
   ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.ecs_tasks.id
   security_group_id            = aws_security_group.security_group_db.id
-  to_port                      = var.db_port
+  to_port                      = var.database_port
 }
 
 
 #------------------------------------------------------------------------------
+# NEED THIS SECURITY GROUP for successful execution of
+# null_resource.import_geojson"
 
 resource "aws_security_group" "bastion_to_rds" {
   name        = "Security_EC2_RDS"
@@ -155,21 +147,21 @@ resource "aws_security_group" "bastion_to_rds" {
 # allowing connection to DB from EC2
 resource "aws_vpc_security_group_ingress_rule" "bastion_to_rds" {
   description                  = "Allow private to access db"
-  from_port                    = var.db_port
+  from_port                    = var.database_port
   ip_protocol                  = "tcp"
-  referenced_security_group_id = var.security_group_bastion_id
+  referenced_security_group_id = var.bastion_sg_id
   security_group_id            = aws_security_group.security_group_db.id
-  to_port                      = var.db_port
+  to_port                      = var.database_port
 }
 
 # allowing output from DB
 resource "aws_vpc_security_group_egress_rule" "bastion_to_rds" {
   description                  = "Allow private from db"
-  from_port                    = var.db_port
+  from_port                    = var.database_port
   ip_protocol                  = "tcp"
-  referenced_security_group_id = var.security_group_bastion_id
+  referenced_security_group_id = var.bastion_sg_id
   security_group_id            = aws_security_group.security_group_db.id
-  to_port                      = var.db_port
+  to_port                      = var.database_port
 }
 
 #---------------------------------------------------------------------------------------------------
@@ -244,7 +236,7 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_task_allow_alb" {
   to_port     = var.ecs_port
   ip_protocol = "tcp"
   
-  referenced_security_group_id = aws_security_group.security_group_alb.id
+  referenced_security_group_id = aws_security_group.alb_sg.id
 }
 
 resource "aws_vpc_security_group_egress_rule" "ecs_to_database" {
@@ -252,7 +244,7 @@ resource "aws_vpc_security_group_egress_rule" "ecs_to_database" {
 
   description = "Allow ECS tasks to connect to PostgreSQL database"
   ip_protocol = "tcp"
-  from_port   = var.db_port
-  to_port     = var.db_port
+  from_port   = var.database_port
+  to_port     = var.database_port
   cidr_ipv4   = "10.0.0.0/16"  # Allow entire VPC
 }

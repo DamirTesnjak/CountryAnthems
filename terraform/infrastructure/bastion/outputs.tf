@@ -1,12 +1,15 @@
-output security_group_bastion_id {
+output bastion_sg_id {
+    description = "EC2 Bastion security group ID"
     value = aws_security_group.bastion_sg.id
 }
 
-output aws_instance_bastion_id {
+output bastion_id {
+    description = "EC2 Bastion ID"
     value = aws_instance.bastion.id
 }
 
 output bastion_public_ip {
+  description = "EC2 Bastion public IP"
   value = aws_instance.bastion.public_ip
 }
 

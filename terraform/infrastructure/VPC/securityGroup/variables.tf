@@ -3,7 +3,7 @@ variable "vpc_id" {
   description = "VPC id"
 }
 
-variable "db_port" {
+variable "database_port" {
   type = number
 }
 
@@ -11,11 +11,11 @@ variable "ecs_port" {
   type = number
 }
 
-variable "alb_port" {
+variable "loadBalancer_port" {
   type = number
 }
 
-variable "security_group_bastion_id" {
+variable "bastion_sg_id" {
   type = string
 }
 

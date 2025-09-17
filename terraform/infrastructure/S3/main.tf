@@ -13,6 +13,7 @@ resource "aws_s3_bucket_ownership_controls" "this" {
 }
 
 # Block all public access to bucket
+# Bucket should not be accessed from the internet
 resource "aws_s3_bucket_public_access_block" "this" {
   bucket = aws_s3_bucket.frontend.id
 
@@ -44,23 +45,30 @@ resource "aws_s3_bucket_policy" "lock_to_oac" {
   policy = data.aws_iam_policy_document.lock_to_oac.json
 }
 
+# creating config file for frontend in which base URL
+# of API (backend) will be stored. This file is needed
+# so that Angular app durring inizialization can inject
+# API URL for later API call from the client
 resource "local_file" "config_json" {
   content  = data.template_file.angular_config.rendered
   filename = "${path.module}/../../../frontend/src/app/config.json"
 }
 
+# Triggering the app build
 resource "null_resource" "build_angular_app" {
   depends_on = [
     aws_s3_bucket.frontend,
     local_file.config_json
   ]
 
+  # The execution happens on local computer
   provisioner "local-exec" {
     working_dir = "${path.module}/../../../frontend"
     command = "npm run build"
   }
 }
 
+# Deploying the build app to S3 bucket
 resource "null_resource" "deploy_to_s3" {
   depends_on = [
     aws_s3_bucket.frontend,
@@ -68,6 +76,7 @@ resource "null_resource" "deploy_to_s3" {
     local_file.config_json
   ]
 
+  # The execution happens on local computer
   provisioner "local-exec" {
     working_dir = "${path.module}/../../../frontend/dist/country-anthems/browser"
     command = "aws s3 sync . s3://${aws_s3_bucket.frontend.bucket} --delete"

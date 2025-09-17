@@ -8,20 +8,20 @@ variable "vpc_name" {
   type        = string
 }
 
-variable "security_group_db_id" {
+variable "database_sg_id" {
   description = "The security groups to deploy the database in"
   type        = string
 }
 
-variable "aws_instance_bastion_id" {
+variable "bastion_id" {
   type = string
 }
 
-variable "db_subnets" {
+variable "database_subnets" {
   type = list(string)
 }
 
-variable "db_user" {
+variable "database_user" {
   type = string
 }
 

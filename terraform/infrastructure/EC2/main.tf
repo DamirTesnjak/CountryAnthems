@@ -1,5 +1,5 @@
 # Security group for VPC endpoints
-resource "aws_security_group" "vpc_endpoints" {
+resource "aws_security_group" "vpc_endpoints_sg" {
   name_prefix = "vpc-endpoints-"
   description = "Security group for VPC endpoints"
   vpc_id      = var.vpc_id
@@ -10,26 +10,26 @@ resource "aws_security_group" "vpc_endpoints" {
 }
 
 # Inbound HTTPS from ECS tasks
-resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_from_ecs" {
-  ip_protocol                  = "tcp"
-  from_port                    = 443
-  to_port                      = 443
-  referenced_security_group_id = var.security_group_ecs_instance_id
-  security_group_id           = aws_security_group.vpc_endpoints.id
-  description                 = "HTTPS from ECS instance"
-}
-
 resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_from_ecs_task" {
   ip_protocol                  = "tcp"
   from_port                    = 443
   to_port                      = 443
-  referenced_security_group_id = var.security_group_ecs_task_id
-  security_group_id           = aws_security_group.vpc_endpoints.id
+  referenced_security_group_id = var.ecs_sg_task_id
+  security_group_id           = aws_security_group.vpc_endpoints_sg.id
   description                 = "HTTPS from ECS tasks"
 }
 
+# Inbound HTTPS from ECS
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_from_ecs" {
+  ip_protocol                  = "tcp"
+  from_port                    = 443
+  to_port                      = 443
+  referenced_security_group_id = var.ecs_sg_id
+  security_group_id           = aws_security_group.vpc_endpoints_sg.id
+  description                 = "HTTPS from ECS instance"
+}
 
-# Subnets
+# Private subnets for VPC endpoints
 resource "aws_subnet" "private" {
   for_each = var.private_subnet_config
 
@@ -44,13 +44,17 @@ resource "aws_subnet" "private" {
   }
 }
 
-# ECS VPC Endpoints
+# VPC Endpoints
+#------------------------------------
+
+# Allows ecs-agent, installed in EC2 API instance, via this endpoint to
+# successfully connect to Amazon ECS-Agent, to register API EC2 to a cluster
 resource "aws_vpc_endpoint" "ecs-agent" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-agent"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs-agent_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 }
 
@@ -59,7 +63,7 @@ resource "aws_vpc_endpoint" "ecs-telemetry" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs-telemetry"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs-telemetry_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 }
 
@@ -68,17 +72,18 @@ resource "aws_vpc_endpoint" "ecs" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecs"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecs_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 }
 
-# ECR VPC Endpoints
+# Allows EC2 API instance, via these endpoints to
+# successfully connect to Amazon service, to pull docker image from ECR
 resource "aws_vpc_endpoint" "ecr-dkr" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecr-dkr_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 }
 
@@ -87,17 +92,18 @@ resource "aws_vpc_endpoint" "ecr-api" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ecr.api"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ecr-api_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 }
 
-# System manager VPC Endpoints
+# Allows EC2 API instance, via this endpoint to
+# successfully connect to Amazon service, to connect to SSM, to get to SSM parameters 
 resource "aws_vpc_endpoint" "ssm" {
   vpc_id = var.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ssm"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ssm_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 
   tags = {
@@ -110,7 +116,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ec2messages"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ec2messages_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 
   tags = {
@@ -123,7 +129,7 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.ssmmessages"
   vpc_endpoint_type = "Interface"
   subnet_ids          = local.ssmmessages_selected_subnet_ids
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  security_group_ids = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 
   tags = {
@@ -137,7 +143,7 @@ resource "aws_vpc_endpoint" "logs" {
   service_name        = "com.amazonaws.${data.aws_region.this.region}.logs"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = local.cloud_watch_selected_subnet_ids
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  security_group_ids  = [aws_security_group.vpc_endpoints_sg.id]
   private_dns_enabled = true
 
   tags = {
@@ -164,7 +170,8 @@ resource "aws_vpc_endpoint" "S3-gateway" {
   }
 }
 
-#Private key
+#------------------------------------
+
 resource "tls_private_key" "ec2" {
   algorithm = "RSA"
   rsa_bits  = 4096
@@ -175,6 +182,7 @@ resource "aws_key_pair" "ec2" {
   public_key = tls_private_key.ec2.public_key_openssh
 }
 
+# genetrate .pem key for SSH connection
 resource "local_file" "ec2-my-keys" {
   content = tls_private_key.ec2.private_key_pem
   filename = "${var.name}-ec2.pem"
@@ -223,7 +231,7 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = false
-    security_groups             = [var.security_group_ecs_instance_id]
+    security_groups             = [var.ecs_sg_id]
   }
 
     user_data = base64encode(templatefile("${path.module}/user_data.sh", {
@@ -286,7 +294,7 @@ resource "aws_ecs_capacity_provider" "cp" {
       status                    = "DISABLED"
     }
   }
-  depends_on = [var.security_group_alb_id]
+  depends_on = [var.loadBalancer_sg_id]
 }
 
 resource "aws_ecs_cluster_capacity_providers" "providers" {

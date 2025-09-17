@@ -1,4 +1,4 @@
-output "cf_id" {
+output "cloudFront_id" {
   description = "CloudFront ID"
   value       = aws_cloudfront_distribution.cdn.id
 }
@@ -8,7 +8,7 @@ output "ecs_service_url" {
   value       = "http://${aws_lb.api.dns_name}"
 }
 
-output "aws_route_table_public_id" {
+output "public_route_table_id" {
   value = aws_route_table.public.id
 }
 

@@ -1,5 +1,5 @@
 data "aws_cloudfront_distribution" "cdn" {
-  id = var.cf_id
+  id = var.cloudFront_id
 }
 
 data "aws_iam_policy_document" "lock_to_oac" {
@@ -26,6 +26,7 @@ data "aws_iam_policy_document" "lock_to_oac" {
   }
 }
 
+# template file config for generating config file
 data "template_file" "angular_config" {
   template = file("${path.module}/config.tpl.json")
   vars     = { api_url = var.ecs_service_url }

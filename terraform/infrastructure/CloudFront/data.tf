@@ -1,3 +1,3 @@
-data "aws_security_group" "security_group_alb" {
-  id = var.security_group_alb_id
+data "aws_security_group" "alb_sg" {
+  id = var.loadBalancer_sg_id
 }

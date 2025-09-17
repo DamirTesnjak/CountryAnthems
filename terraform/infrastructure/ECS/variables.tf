@@ -15,11 +15,11 @@ variable "bucket_domain_name" {
   type = string
 }
 
-variable "ecs_agent_subnets" {
+variable "ecs_agent_subnets_id" {
   type = list(string)
 }
 
-variable "security_group_ecs_task_id" {
+variable "ecs_sg_task_id" {
   type = string
 }
 
@@ -35,15 +35,15 @@ variable "image_tag" {
   type = string
 }
 
-variable "pg_host" {
+variable "database_host" {
   type = string
 }
 
-variable "pg_password" {
+variable "database_password" {
   type = string
 }
 
-variable "pg_db" {
+variable "database_name" {
   type = string
 }
 

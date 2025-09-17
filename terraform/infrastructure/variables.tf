@@ -2,7 +2,7 @@ variable "ecs_port" {
   type = number
 }
 
-variable "db_port" {
+variable "database_port" {
   type = number
 }
 
@@ -10,7 +10,7 @@ variable "name" {
   type = string
 }
 
-variable "alb_port" {
+variable "loadBalancer_port" {
   type = string
 }
 

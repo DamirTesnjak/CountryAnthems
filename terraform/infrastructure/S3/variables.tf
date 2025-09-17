@@ -7,7 +7,7 @@ variable "vpc_id" {
   type = string
 }
 
-variable "cf_id" {
+variable "cloudFront_id" {
   type = string
 }
 

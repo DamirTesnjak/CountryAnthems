@@ -7,15 +7,15 @@ variable "name" {
   type = string
 }
 
-variable "alb_port" {
+variable "loadBalancer_port" {
   type = number
 }
 
-variable "alb_subnets" {
+variable "loadBalancer_subnets" {
   type = list(string)
 }
 
-variable "security_group_alb_id" {
+variable "loadBalancer_sg_id" {
   type = string
 }
 
@@ -23,6 +23,6 @@ variable "bucket_regional_domain_name" {
   type = string
 }
 
-variable "aws_lb_target_group_service_arn" {
+variable "loadBalancer_tg_service_arn" {
   type = string
 }

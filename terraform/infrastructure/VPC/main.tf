@@ -22,10 +22,10 @@ module "securityGroup" {
   source = "./securityGroup"
 
   vpc_id   = aws_vpc.main.id
-  security_group_bastion_id = var.security_group_bastion_id
-  db_port  = var.db_port
+  bastion_sg_id = var.bastion_sg_id
+  database_port  = var.database_port
   ecs_port = var.ecs_port
-  alb_port = var.alb_port
+  loadBalancer_port = var.loadBalancer_port
   bastion_ingress = var.bastion_ingress
   vpc_endpoints_sg_id = var.vpc_endpoints_sg_id
   db_subnet_cidr = aws_subnet.private_4_us_west_2b.cidr_block
@@ -111,20 +111,20 @@ resource "aws_subnet" "public_bastion" {
 # Associate subnets with public route table
 resource "aws_route_table_association" "public_bastion" {
   subnet_id      = aws_subnet.public_bastion.id
-  route_table_id = var.aws_route_table_public_id
+  route_table_id = var.public_route_table_id
 }
 
 resource "aws_route_table_association" "public_1_us_west_2a" {
   subnet_id      = aws_subnet.public_1_us_west_2a.id
-  route_table_id = var.aws_route_table_public_id
+  route_table_id = var.public_route_table_id
 }
 
 resource "aws_route_table_association" "public_3_us_west_2b" {
   subnet_id      = aws_subnet.public_3_us_west_2b.id
-  route_table_id = var.aws_route_table_public_id
+  route_table_id = var.public_route_table_id
 }
 
 resource "aws_route_table_association" "public_5_us_west_2c" {
   subnet_id      = aws_subnet.public_5_us_west_2c.id
-  route_table_id = var.aws_route_table_public_id
+  route_table_id = var.public_route_table_id
 }
