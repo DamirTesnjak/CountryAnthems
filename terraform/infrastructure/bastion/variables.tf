@@ -8,9 +8,11 @@ variable "vpc_id" {
 }
 
 variable "bastion_public_subnet" {
+    description = "Subnet inside VPC"
     type = string
 }
 
 variable "bastion_ingress" {
+    description = "Your computer local IP address"
     type = string
 }

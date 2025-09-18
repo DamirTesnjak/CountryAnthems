@@ -54,7 +54,7 @@ resource "aws_cloudfront_vpc_origin" "this" {
   }
 }
 
-# Allows us private access to S3
+# Allows private access to S3
 resource "aws_cloudfront_origin_access_control" "s3_oac" {
   name                              = "s3-oac"
   description                       = "OAC for S3"
@@ -76,8 +76,9 @@ resource "aws_cloudfront_distribution" "cdn" {
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
   }
 
-  # Load balancer origin, we access the APP API from the internet
-  # through load balancer
+  # Load balancer origin, we access the APP API from the internet through load balancer
+  # since frontend is running in browser thus API requests are
+  # triggered from client 
   origin {
     domain_name = aws_lb.api.dns_name
     origin_id   = "cluster-${var.name}"
@@ -102,7 +103,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  # For the API
+  # For the API on the EC2 instance
   ordered_cache_behavior {
     path_pattern           = "/api/*"
     target_origin_id       = "cluster-${var.name}"

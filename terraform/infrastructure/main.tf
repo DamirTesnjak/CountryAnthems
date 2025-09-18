@@ -20,7 +20,7 @@ module "rds" {
   name                 = "${var.name}-${var.env_name}"
   vpc_name             = module.vpc.vpc_name
   database_subnets           = module.vpc.database_subnets
-  database_user        = module.ecs.database_user
+  database_username        = module.ecs.database_username
   bastion_public_ip = module.bastion.bastion_public_ip
   bastion_private_key = module.bastion.bastion_private_key
 }
@@ -58,6 +58,7 @@ module "ecs" {
   cloudfront_domain = module.cloud_front.cloudfront_domain
   capacity_provider_id = module.ec2.capacity_provider_id
   ecs_sg_task_id = module.vpc.ecs_sg_task_id
+  aws_account_id = var.aws_account_id
 }
 
 module "cloud_front" {

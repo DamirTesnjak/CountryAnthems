@@ -54,3 +54,7 @@ variable "cloudfront_domain" {
 variable "capacity_provider_id" {
   type = string
 }
+
+variable "aws_account_id" {
+  type = string
+}

@@ -41,12 +41,12 @@ data "aws_iam_policy_document" "execution_policy" {
       "ecr:GetAuthorizationToken"
     ]
     resources = [
-      "arn:aws:ssm:us-west-2:766020828589:parameter/POSTGRES_USER",
-      "arn:aws:ssm:us-west-2:766020828589:parameter/POSTGRES_PASSWORD",
-      "arn:aws:ssm:us-west-2:766020828589:parameter/POSTGRES_HOST",
-      "arn:aws:ssm:us-west-2:766020828589:parameter/POSTGRES_DB",
-      "arn:aws:ssm:us-west-2:766020828589:parameter/POSTGRES_HOST",
-      "arn:aws:ssm:us-west-2:766020828589:parameter/ORIGIN",
+      "arn:aws:ssm:${data.aws_region.this.region}:${var.aws_account_id}:parameter/POSTGRES_USER",
+      "arn:aws:ssm:${data.aws_region.this.region}:${var.aws_account_id}:parameter/POSTGRES_PASSWORD",
+      "arn:aws:ssm:${data.aws_region.this.region}:${var.aws_account_id}:parameter/POSTGRES_HOST",
+      "arn:aws:ssm:${data.aws_region.this.region}:${var.aws_account_id}:parameter/POSTGRES_DB",
+      "arn:aws:ssm:${data.aws_region.this.region}:${var.aws_account_id}:parameter/POSTGRES_HOST",
+      "arn:aws:ssm:${data.aws_region.this.region}:${var.aws_account_id}:parameter/ORIGIN",
     ]
   }
 

@@ -9,19 +9,23 @@ resource "aws_key_pair" "bastion" {
 }
 
 # genetrate .pem key for SSH connection
+# use this if you need to manually connect to bastion
 resource "local_file" "my-bastion-key" {
   content = tls_private_key.bastion.private_key_pem
   filename = "${var.name}-bastion.pem"
 }
 
 # Security group for bastion EC2 instance
+# With this security group we allow connection to
+# bastion EC2 instance from local computer.
+
 resource "aws_security_group" "bastion_sg" {
   name        = "Security for bastion"
   description = "Security group for bastion"
   vpc_id      = var.vpc_id
 }
 
-# Allowing connection to bastion EC2 instance
+# Allowing inbound to bastion EC2 instance
 resource "aws_vpc_security_group_ingress_rule" "bastion_sg" {
   description       = "Allow connection from outside internet to access bastion with SSH"
   cidr_ipv4         = var.bastion_ingress
@@ -31,7 +35,7 @@ resource "aws_vpc_security_group_ingress_rule" "bastion_sg" {
   to_port           = 22
 }
 
-# Allowing outbound from bastion EC2 instance - remove
+# Allowing outbound from bastion EC2 instance
 resource "aws_vpc_security_group_egress_rule" "bastion_sg" {
   description       = "Allow from bastion"
   cidr_ipv4         = "0.0.0.0/0"

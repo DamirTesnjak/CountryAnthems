@@ -14,6 +14,7 @@ variable "database_sg_id" {
 }
 
 variable "bastion_id" {
+  description = "Bastion ID"
   type = string
 }
 
@@ -21,11 +22,13 @@ variable "database_subnets" {
   type = list(string)
 }
 
-variable "database_user" {
+variable "database_username" {
+  description = "Username for loggin to database"
   type = string
 }
 
 variable "bastion_public_ip" {
+  description = "EC2 Bastion public IP"
   type = string
 }
 

@@ -1,4 +1,4 @@
-output database_user {
+output database_username {
     value = aws_ssm_parameter.postgres_user.value
 }
 

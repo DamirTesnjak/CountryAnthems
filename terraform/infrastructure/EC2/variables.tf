@@ -1,5 +1,5 @@
 variable "vpc_id" {
-  description = "VPC id value"
+  description = "Virtual private cloud ID"
   type        = string
 }
 

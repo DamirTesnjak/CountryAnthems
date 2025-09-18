@@ -21,3 +21,7 @@ variable "bastion_ingress" {
 variable "env_name" {
   type = string
 }
+
+variable "aws_account_id" {
+  type = string
+}

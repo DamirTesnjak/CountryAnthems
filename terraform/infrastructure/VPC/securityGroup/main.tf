@@ -70,7 +70,7 @@ resource "aws_vpc_security_group_ingress_rule" "ec2_ssh" {
   ip_protocol       = "tcp"
   from_port         = 22
   to_port           = 22
-  cidr_ipv4         = "10.0.0.0/16"  # VPC CIDR
+  cidr_ipv4         = var.vpc_cidr_block  # VPC CIDR
   security_group_id = aws_security_group.ecs_instance.id
   description       = "SSH access from VPC"
 }
@@ -246,5 +246,5 @@ resource "aws_vpc_security_group_egress_rule" "ecs_to_database" {
   ip_protocol = "tcp"
   from_port   = var.database_port
   to_port     = var.database_port
-  cidr_ipv4   = "10.0.0.0/16"  # Allow entire VPC
+  cidr_ipv4   = var.vpc_cidr_block  # Allow entire VPC
 }

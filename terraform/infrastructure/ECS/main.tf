@@ -39,7 +39,7 @@ resource "aws_iam_role" "task" {
 resource "aws_ssm_parameter" "postgres_user" {
   name  = "POSTGRES_USER"
   type  = "SecureString"
-  value = "database_user"
+  value = "database_username"
 }
 
 resource "aws_ssm_parameter" "postgres_host" {

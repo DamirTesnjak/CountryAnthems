@@ -30,3 +30,7 @@ variable "vpc_endpoints_sg_id" {
 variable "db_subnet_cidr" {
   type = string
 }
+
+variable "vpc_cidr_block" {
+  type = string
+}

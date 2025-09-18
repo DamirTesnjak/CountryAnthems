@@ -15,18 +15,18 @@ output "vpc_name" {
 output "loadBalancer_subnets" {
   description = "ALB subnets"
   value = [
-    aws_subnet.public_1_us_west_2a.id,
-    aws_subnet.public_3_us_west_2b.id,
-    aws_subnet.public_5_us_west_2c.id
+    aws_subnet.public_1a.id,
+    aws_subnet.public_3b.id,
+    aws_subnet.public_5c.id
   ]
 }
 
 output "database_subnets" {
   description = "DB subnets"
   value = [
-    aws_subnet.private_2_us_west_2a.id,
-    aws_subnet.private_4_us_west_2b.id,
-    aws_subnet.private_6_us_west_2c.id
+    aws_subnet.private_2a.id,
+    aws_subnet.private_4b.id,
+    aws_subnet.private_6c.id
   ]
 }
 
