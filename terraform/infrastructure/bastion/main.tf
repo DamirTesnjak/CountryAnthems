@@ -1,17 +1,17 @@
-resource "tls_private_key" "bastion" {
+resource "tls_private_key" "bastion_private_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-resource "aws_key_pair" "bastion" {
+resource "aws_key_pair" "bastion_key_pair" {
   key_name   = "${var.name}-bastion"
-  public_key = tls_private_key.bastion.public_key_openssh
+  public_key = tls_private_key.bastion_private_key.public_key_openssh
 }
 
 # genetrate .pem key for SSH connection
 # use this if you need to manually connect to bastion
 resource "local_file" "my-bastion-key" {
-  content = tls_private_key.bastion.private_key_pem
+  content = tls_private_key.bastion_private_key.private_key_pem
   filename = "${var.name}-bastion.pem"
 }
 
@@ -26,7 +26,7 @@ resource "aws_security_group" "bastion_sg" {
 }
 
 # Allowing inbound to bastion EC2 instance
-resource "aws_vpc_security_group_ingress_rule" "bastion_sg" {
+resource "aws_vpc_security_group_ingress_rule" "bastion_sg_ingress_rule" {
   description       = "Allow connection from outside internet to access bastion with SSH"
   cidr_ipv4         = var.bastion_ingress
   from_port         = 22
@@ -36,7 +36,7 @@ resource "aws_vpc_security_group_ingress_rule" "bastion_sg" {
 }
 
 # Allowing outbound from bastion EC2 instance
-resource "aws_vpc_security_group_egress_rule" "bastion_sg" {
+resource "aws_vpc_security_group_egress_rule" "bastion_sg_egress_rule" {
   description       = "Allow from bastion"
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
@@ -47,7 +47,7 @@ resource "aws_vpc_security_group_egress_rule" "bastion_sg" {
 resource "aws_instance" "bastion" {
     ami = "ami-03aa99ddf5498ceb9"
     instance_type = "t3a.micro"
-    key_name = aws_key_pair.bastion.key_name
+    key_name = aws_key_pair.bastion_key_pair.key_name
     monitoring = false
     associate_public_ip_address = true
     subnet_id = var.bastion_public_subnet

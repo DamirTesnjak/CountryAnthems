@@ -1,4 +1,4 @@
-resource "aws_internet_gateway" "this" {
+resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = var.vpc_id
 
   tags = {
@@ -7,17 +7,17 @@ resource "aws_internet_gateway" "this" {
 }
 
 # Public route table
-resource "aws_route_table" "public" {
+resource "aws_route_table" "public_route_table" {
   vpc_id = var.vpc_id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
+    gateway_id = aws_internet_gateway.internet_gateway.id
   }
 }
 
 # Load balancer instance configuration
-resource "aws_lb" "api" {
+resource "aws_lb" "load_balancer_api" {
   name                       = "${var.name}-alb"
   internal                   = false
   load_balancer_type         = "application"
@@ -28,8 +28,8 @@ resource "aws_lb" "api" {
   preserve_host_header       = false
 }
 
-resource "aws_lb_listener" "app_listener" {
-  load_balancer_arn = aws_lb.api.arn
+resource "aws_lb_listener" "lb_listener" {
+  load_balancer_arn = aws_lb.load_balancer_api.arn
   port              = var.loadBalancer_port
   protocol          = "HTTP"
 
@@ -39,9 +39,9 @@ resource "aws_lb_listener" "app_listener" {
   }
 }
 
-resource "aws_cloudfront_vpc_origin" "this" {
+resource "aws_cloudfront_vpc_origin" "load_balancer_origin" {
   vpc_origin_endpoint_config {
-    arn                    = aws_lb.api.arn
+    arn                    = aws_lb.load_balancer_api.arn
     http_port              = var.loadBalancer_port
     https_port             = 443
     name                   = "cluster-${var.name}"
@@ -55,7 +55,7 @@ resource "aws_cloudfront_vpc_origin" "this" {
 }
 
 # Allows private access to S3
-resource "aws_cloudfront_origin_access_control" "s3_oac" {
+resource "aws_cloudfront_origin_access_control" "s3_origin_access_control" {
   name                              = "s3-oac"
   description                       = "OAC for S3"
   origin_access_control_origin_type = "s3"
@@ -64,7 +64,7 @@ resource "aws_cloudfront_origin_access_control" "s3_oac" {
 }
 
 # New instance of cloudfront distribution
-resource "aws_cloudfront_distribution" "cdn" {
+resource "aws_cloudfront_distribution" "cloud_front_distribution" {
   enabled             = true
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
@@ -73,18 +73,18 @@ resource "aws_cloudfront_distribution" "cdn" {
   origin {
     domain_name              = var.bucket_regional_domain_name
     origin_id                = "s3-origin-${var.name}"
-    origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3_origin_access_control.id
   }
 
   # Load balancer origin, we access the APP API from the internet through load balancer
   # since frontend is running in browser thus API requests are
   # triggered from client 
   origin {
-    domain_name = aws_lb.api.dns_name
+    domain_name = aws_lb.load_balancer_api.dns_name
     origin_id   = "cluster-${var.name}"
 
     vpc_origin_config {
-      vpc_origin_id = aws_cloudfront_vpc_origin.this.id
+      vpc_origin_id = aws_cloudfront_vpc_origin.load_balancer_origin.id
     }
   }
 

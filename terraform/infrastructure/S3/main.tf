@@ -5,7 +5,7 @@ resource "aws_s3_bucket" "frontend" {
 }
 
 # Object ownership in bucket
-resource "aws_s3_bucket_ownership_controls" "this" {
+resource "aws_s3_bucket_ownership_controls" "bucket_ownership_controls" {
   bucket = aws_s3_bucket.frontend.id
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -14,7 +14,7 @@ resource "aws_s3_bucket_ownership_controls" "this" {
 
 # Block all public access to bucket
 # Bucket should not be accessed from the internet
-resource "aws_s3_bucket_public_access_block" "this" {
+resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
   bucket = aws_s3_bucket.frontend.id
 
   block_public_acls       = true
@@ -23,15 +23,15 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_acl" "alc" {
-  depends_on = [aws_s3_bucket_ownership_controls.this]
+resource "aws_s3_bucket_acl" "bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.bucket_ownership_controls]
 
   bucket = aws_s3_bucket.frontend.id
   acl    = "private"
 }
 
 # Bucket versioning, good for restoring old versions
-resource "aws_s3_bucket_versioning" "this" {
+resource "aws_s3_bucket_versioning" "bucket_versioning" {
   bucket = aws_s3_bucket.frontend.id
 
   versioning_configuration {

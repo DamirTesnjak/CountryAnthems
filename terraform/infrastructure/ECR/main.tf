@@ -1,5 +1,5 @@
 # New instance of ECR for docker images
-resource "aws_ecr_repository" "this" {
+resource "aws_ecr_repository" "ecr_repository" {
   name                 = var.name
   encryption_configuration {
     encryption_type = "AES256"
@@ -8,7 +8,7 @@ resource "aws_ecr_repository" "this" {
 
 # Pushing Docker image to ECR
 resource "null_resource" "push_to_ecr" {
-  depends_on = [aws_ecr_repository.this]
+  depends_on = [aws_ecr_repository.ecr_repository]
 
   triggers = {
     image_tag  = var.image_tag
@@ -20,7 +20,7 @@ resource "null_resource" "push_to_ecr" {
 
     command = <<-EOT
     export REGION="${data.aws_region.this.region}"
-    export REPO_URL="${aws_ecr_repository.this.repository_url}"
+    export REPO_URL="${aws_ecr_repository.ecr_repository.repository_url}"
     export NAME="${var.name}"
     export IMAGE_TAG="${var.image_tag}"
     cd ../../../be/api

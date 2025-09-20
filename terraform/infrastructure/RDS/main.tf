@@ -24,7 +24,7 @@ resource "aws_db_subnet_group" "rds-subnets" {
 }
 
 # New instance od a database
-resource "aws_db_instance" "this" {
+resource "aws_db_instance" "db_instance" {
   allocated_storage                   = 20
   db_name                             = "geo"
   engine                              = "postgres"
@@ -47,7 +47,7 @@ resource "null_resource" "import_geojson" {
   triggers = {
     bastion_id = var.bastion_id
   }
-  depends_on = [aws_db_instance.this]
+  depends_on = [aws_db_instance.db_instance]
 
   connection {
     type        = "ssh"
@@ -85,18 +85,18 @@ resource "null_resource" "import_geojson" {
     inline = [
       "sudo apt-get update",
       "sudo apt-get install -y postgresql-client gdal-bin dos2unix",
-      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.database_username} -d ${aws_db_instance.this.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\"",
-      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.database_username} -d ${aws_db_instance.this.db_name} --file=/tmp/init.sql",
+      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.db_instance.address} -p ${aws_db_instance.db_instance.port} -U ${var.database_username} -d ${aws_db_instance.db_instance.db_name} -c \"CREATE EXTENSION IF NOT EXISTS postgis;\"",
+      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.db_instance.address} -p ${aws_db_instance.db_instance.port} -U ${var.database_username} -d ${aws_db_instance.db_instance.db_name} --file=/tmp/init.sql",
       "dos2unix /tmp/import.sh", # use this if bash script was created in Windows
       "chmod +x /tmp/import.sh", # allows premission to run a bash script
-      "export PGHOST=${aws_db_instance.this.address}",
-      "export PGPORT=${aws_db_instance.this.port}",
+      "export PGHOST=${aws_db_instance.db_instance.address}",
+      "export PGPORT=${aws_db_instance.db_instance.port}",
       "export POSTGRES_USER=${var.database_username}",
       "export POSTGRES_PASSWORD=${random_string.password.result}",
-      "export POSTGRES_DB=${aws_db_instance.this.db_name}",
+      "export POSTGRES_DB=${aws_db_instance.db_instance.db_name}",
       "/tmp/import.sh",
       "sed \"s|__DATA_PATH__|/tmp/countries_capitals_anthems.json|g\" /tmp/update.sql > /tmp/update_parsed.sql",
-      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.this.address} -p ${aws_db_instance.this.port} -U ${var.database_username} -d ${aws_db_instance.this.db_name} -f /tmp/update_parsed.sql"
+      "PGPASSWORD='${random_string.password.result}' psql -v ON_ERROR_STOP=1 -h ${aws_db_instance.db_instance.address} -p ${aws_db_instance.db_instance.port} -U ${var.database_username} -d ${aws_db_instance.db_instance.db_name} -f /tmp/update_parsed.sql"
     ]
   }
 }

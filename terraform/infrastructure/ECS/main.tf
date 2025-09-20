@@ -66,7 +66,7 @@ resource "aws_ssm_parameter" "origin" {
   value = var.cloudfront_domain
 }
 
-resource "aws_ecs_task_definition" "api_task" {
+resource "aws_ecs_task_definition" "ecs_task_definition" {
   execution_role_arn = aws_iam_role.execution.arn
   family             = "${var.name}-task"
   task_role_arn      = aws_iam_role.task.arn
@@ -159,10 +159,10 @@ resource "aws_lb_target_group" "service" {
   target_type = "ip"
 }
 
-resource "aws_ecs_service" "api" {
+resource "aws_ecs_service" "ecs_service_api" {
   name            = "${var.name}-service"
   cluster         = aws_ecs_cluster.cluster.id
-  task_definition = aws_ecs_task_definition.api_task.arn
+  task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 1
   launch_type     = "EC2" 
   depends_on      = [aws_iam_role_policy_attachment.service]

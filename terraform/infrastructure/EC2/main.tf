@@ -206,7 +206,7 @@ resource "aws_iam_instance_profile" "this" {
 
 # Launch template, to create new EC2 instance, from which API will
 # be running
-resource "aws_launch_template" "this" {
+resource "aws_launch_template" "ec2_template" {
   name          = "ec2-template"
   image_id      = "ami-05f991e317f30f87a"
   key_name      = aws_key_pair.ec2.key_name
@@ -247,7 +247,7 @@ resource "aws_launch_template" "this" {
   }
 }
 
-resource "aws_autoscaling_group" "asg" {
+resource "aws_autoscaling_group" "autoscaling_group" {
   name = "asg"
   desired_capacity   = 1
   max_size           = 5
@@ -255,7 +255,7 @@ resource "aws_autoscaling_group" "asg" {
   protect_from_scale_in = true
   vpc_zone_identifier = local.ecs-agent_selected_subnet_ids
   launch_template {
-    id      = aws_launch_template.this.id
+    id      = aws_launch_template.ec2_template.id
     version = "$Latest"
   }
 
@@ -274,7 +274,7 @@ resource "aws_autoscaling_group" "asg" {
 }
 
 resource "aws_autoscaling_policy" "this" {
-  autoscaling_group_name = aws_autoscaling_group.asg.name
+  autoscaling_group_name = aws_autoscaling_group.autoscaling_group.name
   name                   = "${var.name}-cpu-target-tracking"
   policy_type            = "TargetTrackingScaling"
 
@@ -290,7 +290,7 @@ resource "aws_autoscaling_policy" "this" {
 resource "aws_ecs_capacity_provider" "cp" {
   name = "EC2"
   auto_scaling_group_provider {
-    auto_scaling_group_arn = aws_autoscaling_group.asg.arn
+    auto_scaling_group_arn = aws_autoscaling_group.autoscaling_group.arn
     managed_scaling {
       status                    = "DISABLED"
     }

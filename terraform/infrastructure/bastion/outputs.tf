@@ -15,5 +15,5 @@ output bastion_public_ip {
 
 output bastion_private_key {
     description = "Key for SSH connection"
-    value = tls_private_key.bastion.private_key_pem
+    value = tls_private_key.bastion_private_key.private_key_pem
 }
